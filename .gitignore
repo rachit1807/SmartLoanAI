@@ -1,0 +1,17 @@
+# Node
+node_modules/
+
+# Python
+backend/venv/
+backend/.venv/
+__pycache__/
+*.pyc
+
+# Database
+backend/smartloan.db
+
+# ML Model
+backend/*.pkl
+
+# Environment
+.env
