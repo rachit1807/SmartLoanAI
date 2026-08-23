@@ -1,0 +1,22 @@
+# React
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# Python
+backend/venv/
+backend/.venv/
+backend/__pycache__/
+*.pyc
+
+# Database
+backend/smartloan.db
+
+# ML Model
+backend/*.pkl
+
+# Environment
+.env
+
+# Mac
+.DS_Store
