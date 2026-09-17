@@ -1,128 +1,50 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime
-from database import Base
 from datetime import datetime
 
+from sqlalchemy import Column, DateTime, Float, Integer, String, Text
 
-# User Table
+from database import Base
+
+
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(
-        Integer,
-        primary_key=True,
-        index=True
-    )
-
-    name = Column(
-        String,
-        nullable=False
-    )
-
-    email = Column(
-        String,
-        unique=True,
-        index=True,
-        nullable=False
-    )
-
-    password = Column(
-        String,
-        nullable=False
-    )
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    password = Column(String, nullable=False)
 
 
-
-# Loan Application Table
 class LoanApplication(Base):
     __tablename__ = "loan_applications"
 
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False)
 
-    id = Column(
-        Integer,
-        primary_key=True,
-        index=True
-    )
+    age = Column(Integer, nullable=False)
+    gender = Column(String, nullable=False)
+    married = Column(String, nullable=False)
+    education = Column(String, nullable=False)
+    employment_status = Column(String, nullable=False)
 
+    income = Column(Float, nullable=False)
+    coapplicant_income = Column(Float, default=0)
+    loan_amount = Column(Float, nullable=False)
+    loan_term = Column(Integer, nullable=False)
 
-    user_id = Column(
-        Integer,
-        nullable=False
-    )
+    credit_history = Column(String, nullable=False)
+    property_area = Column(String, nullable=False)
+    status = Column(String, default="Pending")
 
+    approval_probability = Column(Float, nullable=True)
+    risk_level = Column(String, nullable=True)
+    financial_score = Column(Float, nullable=True)
+    financial_health = Column(String, nullable=True)
 
-    age = Column(
-        Integer,
-        nullable=False
-    )
+    ai_reasons = Column(Text, nullable=True)
+    ai_suggestions = Column(Text, nullable=True)
 
+    monthly_emi = Column(Float, nullable=True)
+    total_interest = Column(Float, nullable=True)
+    total_payment = Column(Float, nullable=True)
 
-    gender = Column(
-        String,
-        nullable=False
-    )
-
-
-    married = Column(
-        String,
-        nullable=False
-    )
-
-
-    education = Column(
-        String,
-        nullable=False
-    )
-
-
-    employment_status = Column(
-        String,
-        nullable=False
-    )
-
-
-    income = Column(
-        Float,
-        nullable=False
-    )
-
-
-    coapplicant_income = Column(
-        Float,
-        default=0
-    )
-
-
-    loan_amount = Column(
-        Float,
-        nullable=False
-    )
-
-
-    loan_term = Column(
-        Integer,
-        nullable=False
-    )
-
-
-    credit_history = Column(
-        Integer,
-        nullable=False
-    )
-
-
-    property_area = Column(
-        String,
-        nullable=False
-    )
-
-
-    status = Column(
-        String,
-        default="Pending"
-    )
-
-
-    created_at = Column(
-        DateTime,
-        default=datetime.utcnow
-    )
+    created_at = Column(DateTime, default=datetime.utcnow)
