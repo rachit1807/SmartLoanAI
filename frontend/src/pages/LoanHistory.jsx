@@ -18,7 +18,27 @@ const formatProbability = (value) => {
   return Number.isFinite(number) ? `${Math.round(number <= 1 ? number * 100 : number)}%` : "—";
 };
 
-const toList = (value) => Array.isArray(value) ? value : typeof value === "string" ? value.split(/\n|(?<=[.!?])\s+/).filter(Boolean) : [];
+const toList = (value) => {
+  if (!value) return [];
+
+  if (Array.isArray(value)) return value;
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+
+    return value
+      .replace(/^\[/, "")
+      .replace(/\]$/, "")
+      .split(",")
+      .map(item => item.replace(/"/g, "").trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
 
 function LoanHistory() {
   const navigate = useNavigate();
@@ -121,7 +141,34 @@ const styles = {
   muted: { color:"#64748b", padding:"12px 0" }, tableWrap: { overflowX:"auto" }, health: { color:"#64748b", whiteSpace:"nowrap" },
   detailButton: { display:"inline-flex", alignItems:"center", gap:4, border:0, background:"transparent", color:"#2563eb", fontWeight:700, cursor:"pointer", whiteSpace:"nowrap" },
   detailCell: { padding:"18px 22px", background:"#f8fafc" }, detailGrid: { display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(130px, 1fr))", gap:16 }, detailLabel: { margin:0, fontSize:12, color:"#64748b", textTransform:"uppercase", letterSpacing:".04em" }, detailValue: { display:"block", marginTop:5, color:"#1e293b", textTransform:"capitalize" },
-  adviceGrid: { display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(220px, 1fr))", gap:18, marginTop:20, paddingTop:18, borderTop:"1px solid #e2e8f0" }, adviceTitle: { display:"flex", gap:7, alignItems:"center", fontSize:15, margin:0 }, list: { margin:"8px 0 0", paddingLeft:20, color:"#475569", lineHeight:1.55 },
+  adviceGrid: {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+  gap: 24,
+  marginTop: 24,
+  paddingTop: 20,
+  borderTop: "1px solid #e2e8f0",
+  alignItems: "start",
+},
+
+adviceTitle: {
+  display: "flex",
+  gap: 8,
+  alignItems: "center",
+  fontSize: 16,
+  fontWeight: 600,
+  margin: 0,
+},
+
+list: {
+  marginTop: 12,
+  paddingLeft: 22,
+  color: "#475569",
+  lineHeight: 1.8,
+  whiteSpace: "normal",
+  wordBreak: "break-word",
+  overflowWrap: "break-word",
+},
 };
 
 export default LoanHistory;

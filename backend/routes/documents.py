@@ -90,7 +90,7 @@ def user_documents(user_id: int, db: Session = Depends(get_db)):
 def update_document_status(document_id: int, payload: dict, db: Session = Depends(get_db)):
     """Admin/loan-officer endpoint. Add authentication before production deployment."""
     status = payload.get("verification_status")
-    if status not in {"Pending", "Verified", "Rejected"}:
+    if status not in {"Pending", "Approved", "Rejected"}:
         raise HTTPException(status_code=400, detail="Status must be Pending, Verified, or Rejected.")
 
     document = db.query(LoanDocument).filter(LoanDocument.id == document_id).first()

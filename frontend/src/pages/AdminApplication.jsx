@@ -40,29 +40,35 @@ function AdminApplication() {
 
   const approveLoan = async () => {
     try {
-      await fetch(`${API}/admin/approve/${id}`, {
-        method: "POST",
-      });
+      const response = await fetch(`${API}/admin/approve/${id}`, {
+  method: "POST",
+});
 
-      fetchApplication();
-      alert("Loan Approved Successfully");
+if (response.ok) {
+  await fetchApplication();
+  window.location.reload();
+  alert("Loan Approved Successfully");
+}
     } catch (err) {
       console.log(err);
     }
   };
 
-  const rejectLoan = async () => {
-    try {
-      await fetch(`${API}/admin/reject/${id}`, {
-        method: "POST",
-      });
+ const rejectLoan = async () => {
+  try {
+    const response = await fetch(`${API}/admin/reject/${id}`, {
+      method: "POST",
+    });
 
-      fetchApplication();
-      alert("Loan Rejected");
-    } catch (err) {
-      console.log(err);
+    if (response.ok) {
+      await fetchApplication();
+      window.location.reload();
+      alert("Loan Rejected Successfully");
     }
-  };
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   if (loading) {
     return (
@@ -288,9 +294,9 @@ function AdminApplication() {
               </a>
 
               <p style={{ marginTop: 10 }}>
-                <b>Status:</b>{" "}
-                {doc.review_status || "Pending"}
-              </p>
+  <b>Status:</b>{" "}
+  {doc.verification_status || "Pending"}
+</p>
             </div>
           ))
         ) : (

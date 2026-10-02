@@ -5,7 +5,34 @@ import API from "../api/axios";
 import "../App.css";
 
 const blankForm = { age:"", gender:"", married:"", education:"", employment_status:"", income:"", coapplicant_income:"", loan_amount:"", loan_term:"", credit_history:"", property_area:"" };
-const list = value => Array.isArray(value) ? value : typeof value === "string" ? value.split(/\n|(?<=[.!?])\s+/).filter(Boolean) : [];
+const list = (value) => {
+  if (!value) return [];
+
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch (e) {
+      // Ignore JSON parse error
+    }
+
+    return value
+      .replace(/^\[/, "")
+      .replace(/\]$/, "")
+      .split(",")
+      .map((item) => item.replace(/"/g, "").trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
 const money = value => Number.isFinite(Number(value)) ? new Intl.NumberFormat("en-IN", { style:"currency", currency:"INR", maximumFractionDigits:0 }).format(Number(value)) : "Not available";
 const percent = value => Number.isFinite(Number(value)) ? `${Math.round(Number(value) <= 1 ? Number(value) * 100 : Number(value))}%` : "Not available";
 
@@ -44,7 +71,11 @@ function ApplyLoan() {
   const rawProbability = Number(result?.approval_probability);
   const probability = Number.isFinite(rawProbability) ? Math.min(100, Math.max(0, rawProbability <= 1 ? rawProbability * 100 : rawProbability)) : 0;
   const reasons = list(result?.ai_reasons), suggestions = list(result?.ai_suggestions);
-
+console.log("RESULT:", result);
+console.log("AI REASONS RAW:", result?.ai_reasons);
+console.log("AI SUGGESTIONS RAW:", result?.ai_suggestions);
+console.log("REASONS ARRAY:", reasons);
+console.log("SUGGESTIONS ARRAY:", suggestions);
   return <div className="loan-page"><div className="loan-card-new">
     <div style={styles.header}><div><p style={styles.eyebrow}><Sparkles size={16} /> SMARTLOAN AI</p><h1>AI Loan Application</h1><p className="subtitle">Get an instant AI-based loan prediction and repayment estimate.</p></div><ShieldCheck size={38} color="#2563eb" /></div>
     <form className="loan-form" onSubmit={handleSubmit}>
@@ -80,6 +111,159 @@ function ApplyLoan() {
 }
 function Choice({ name, label, values, data, onChange }) { return <select name={name} value={data[name]} onChange={onChange} required><option value="">{label}</option>{values.map(value => <option key={value} value={value}>{value}</option>)}</select>; }
 function Metric({ label, value }) { return <div style={styles.metric}><p style={styles.metricLabel}>{label}</p><strong style={styles.metricValue}>{value}</strong></div>; }
-function Insight({ title, icon, items }) { return <div style={styles.insight}><h3 style={styles.insightTitle}>{icon}{title}</h3><ul style={styles.list}>{items.map((item, index) => <li key={`${index}-${item}`}>{item}</li>)}</ul></div>; }
-const styles = { header:{display:"flex",justifyContent:"space-between",gap:20,alignItems:"flex-start"}, eyebrow:{display:"flex",gap:7,alignItems:"center",color:"#2563eb",fontSize:12,fontWeight:800,letterSpacing:".08em",margin:"0 0 8px"}, error:{color:"#b91c1c",background:"#fef2f2",border:"1px solid #fecaca",borderRadius:9,padding:12,marginTop:18}, result:{marginTop:28,textAlign:"left",padding:24}, top:{display:"flex",gap:14,alignItems:"center"}, label:{margin:0,fontSize:12,fontWeight:800,opacity:.8,letterSpacing:".05em"}, status:{margin:"4px 0 0",textTransform:"capitalize"}, grid:{display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(130px, 1fr))",gap:12,margin:"20px 0"}, metric:{background:"rgba(255,255,255,.54)",borderRadius:10,padding:12}, metricLabel:{margin:0,fontSize:12,opacity:.75}, metricValue:{display:"block",fontSize:16,marginTop:5,textTransform:"capitalize"}, emiSummary:{background:"rgba(37,99,235,.10)",border:"1px solid rgba(37,99,235,.2)",borderRadius:12,padding:16,marginTop:20}, summaryTitle:{display:"flex",gap:8,alignItems:"center",margin:"0 0 14px",fontSize:16}, insights:{display:"grid",gap:16,marginTop:22}, insight:{borderTop:"1px solid rgba(71,85,105,.2)",paddingTop:16}, insightTitle:{display:"flex",gap:8,alignItems:"center",margin:0,fontSize:16}, list:{margin:"9px 0 0",paddingLeft:20,lineHeight:1.55} };
+function Insight({ title, icon, items }) {
+  return (
+    <div style={styles.insight}>
+      <h3 style={styles.insightTitle}>
+        {icon}
+        <span>{title}</span>
+      </h3>
+
+      <ul style={styles.list}>
+        {items.map((item, index) => (
+          <li
+            key={index}
+            style={{
+              marginBottom: "10px",
+              color: "#374151",
+              lineHeight: "1.7",
+            }}
+          >
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+const styles = {
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: 20,
+    alignItems: "flex-start",
+  },
+
+  eyebrow: {
+    display: "flex",
+    gap: 7,
+    alignItems: "center",
+    color: "#2563eb",
+    fontSize: 12,
+    fontWeight: 800,
+    letterSpacing: ".08em",
+    margin: "0 0 8px",
+  },
+
+  error: {
+    color: "#b91c1c",
+    background: "#fef2f2",
+    border: "1px solid #fecaca",
+    borderRadius: 9,
+    padding: 12,
+    marginTop: 18,
+  },
+
+  result: {
+    marginTop: 28,
+    textAlign: "left",
+    padding: 24,
+  },
+
+  top: {
+    display: "flex",
+    gap: 14,
+    alignItems: "center",
+  },
+
+  label: {
+    margin: 0,
+    fontSize: 12,
+    fontWeight: 800,
+    opacity: 0.8,
+    letterSpacing: ".05em",
+  },
+
+  status: {
+    margin: "4px 0 0",
+    textTransform: "capitalize",
+  },
+
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))",
+    gap: 12,
+    margin: "20px 0",
+  },
+
+  metric: {
+    background: "rgba(255,255,255,.54)",
+    borderRadius: 10,
+    padding: 12,
+  },
+
+  metricLabel: {
+    margin: 0,
+    fontSize: 12,
+    opacity: 0.75,
+  },
+
+  metricValue: {
+    display: "block",
+    fontSize: 16,
+    marginTop: 5,
+    textTransform: "capitalize",
+  },
+
+  emiSummary: {
+    background: "rgba(37,99,235,.10)",
+    border: "1px solid rgba(37,99,235,.2)",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 20,
+  },
+
+  summaryTitle: {
+    display: "flex",
+    gap: 8,
+    alignItems: "center",
+    margin: "0 0 14px",
+    fontSize: 16,
+  },
+
+  insights: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit,minmax(340px,1fr))",
+    gap: 24,
+    marginTop: 24,
+    alignItems: "start",
+  },
+
+  insight: {
+    background: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: 14,
+    padding: 20,
+    minWidth: 0,
+    overflowWrap: "break-word",
+    wordBreak: "break-word",
+    boxShadow: "0 4px 12px rgba(0,0,0,.05)",
+  },
+
+  insightTitle: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    margin: 0,
+    marginBottom: 12,
+    fontSize: 16,
+    fontWeight: 600,
+  },
+
+  list: {
+    margin: 0,
+    paddingLeft: 22,
+    lineHeight: 1.8,
+  },
+};
 export default ApplyLoan;

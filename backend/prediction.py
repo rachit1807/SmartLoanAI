@@ -104,6 +104,7 @@ def calculate_emi(loan_amount, months, annual_rate=10.5):
 
 
 def predict_loan(data):
+    print("PREDICT LOAN FUNCTION CALLED")
     financial_score, financial_health, reasons, suggestions = calculate_financial_health(data)
     loan_amount_rupees = float(data["loan_amount"])
 
@@ -138,7 +139,13 @@ def predict_loan(data):
     monthly_emi, total_interest, total_payment = calculate_emi(
         loan_amount_rupees, int(data["loan_term"])
     )
-
+    print("="*60)
+    print("REASONS:", reasons)
+    print("SUGGESTIONS:", suggestions)
+    print("="*60)
+    print("===== PREDICTION OUTPUT =====")
+    print(reasons)
+    print(suggestions)
     return {
         "status": status,
         "approval_probability": approved_probability,
