@@ -45,6 +45,17 @@ class LoanApplication(Base):
     # Human-review workflow is kept separate from the AI prediction status.
     review_status = Column(String, default="Submitted")
     review_note = Column(Text, nullable=True)
+        # Uploaded Documents
+    income_report = Column(String, nullable=True)
+    aadhaar = Column(String, nullable=True)
+    pan = Column(String, nullable=True)
+    salary_slip = Column(String, nullable=True)
+    bank_statement = Column(String, nullable=True)
+    photo = Column(String, nullable=True)
+
+    # Admin Verification
+    verified_by = Column(String, nullable=True)
+    verified_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 

@@ -24,7 +24,7 @@ def get_db():
 
 
 # ==========================
-# APPLY LOAN + ML PREDICTION
+# APPLY LOAN
 # ==========================
 
 @router.post("/apply")
@@ -34,10 +34,7 @@ def apply_loan(
 ):
     try:
 
-        prediction = predict_loan(loan_data)
-
         new_application = LoanApplication(
-
             user_id=loan_data["user_id"],
             age=loan_data["age"],
             gender=loan_data["gender"],
@@ -50,8 +47,9 @@ def apply_loan(
             loan_term=loan_data["loan_term"],
             credit_history=loan_data["credit_history"],
             property_area=loan_data["property_area"],
-            status=prediction["status"]
 
+            # Don't run AI here
+            status="Pending Documents"
         )
 
         db.add(new_application)
@@ -59,39 +57,17 @@ def apply_loan(
         db.refresh(new_application)
 
         return {
-
-            "message": "Loan prediction completed",
-
+            "message": "Loan application submitted successfully.",
             "application_id": new_application.id,
-
-            "status": prediction["status"],
-
-            "approval_probability": prediction["approval_probability"],
-
-            "risk_level": prediction["risk_level"],
-
-            "financial_score": prediction["financial_score"],
-
-            "financial_health": prediction["financial_health"],
-
-            "ai_reasons": prediction["ai_reasons"],
-
-            "ai_suggestions": prediction["ai_suggestions"],
-
-            "monthly_emi": prediction["monthly_emi"],
-
-            "total_interest": prediction["total_interest"],
-
-            "total_payment": prediction["total_payment"]
-
+            "status": "Pending Documents"
         }
 
     except Exception as e:
-
         raise HTTPException(
             status_code=500,
             detail=str(e)
         )
+      
 
 
 # ==========================
