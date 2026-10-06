@@ -9,9 +9,11 @@ __pycache__/
 
 # Database
 backend/smartloan.db
+backend/uploads/
 
 # ML Model
 backend/*.pkl
 
 # Environment
 .env
+.DS_Store
