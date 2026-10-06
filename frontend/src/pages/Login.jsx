@@ -10,6 +10,20 @@ import {
 import API from "../api/axios";
 import "../App.css";
 
+const getErrorMessage = (error) => {
+    const detail = error.response?.data?.detail;
+
+    if (typeof detail === "string") {
+        return detail;
+    }
+
+    if (Array.isArray(detail)) {
+        return detail[0]?.msg || "Please check the details you entered.";
+    }
+
+    return "Login failed. Please try again.";
+};
+
 
 
 function Login(){
@@ -94,13 +108,7 @@ function Login(){
             console.log(error);
 
 
-            alert(
-
-                error.response?.data?.detail ||
-
-                "Login failed"
-
-            );
+            alert(getErrorMessage(error));
 
 
         }

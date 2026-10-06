@@ -11,6 +11,20 @@ import {
 import API from "../api/axios";
 import "../App.css";
 
+const getErrorMessage = (error) => {
+  const detail = error.response?.data?.detail;
+
+  if (typeof detail === "string") {
+    return detail;
+  }
+
+  if (Array.isArray(detail)) {
+    return detail[0]?.msg || "Please check the details you entered.";
+  }
+
+  return "Registration failed. Please try again.";
+};
+
 function Register() {
   const navigate = useNavigate();
 
@@ -36,10 +50,7 @@ function Register() {
     } catch (error) {
       console.log(error);
 
-      alert(
-        error.response?.data?.detail ||
-          "Registration failed"
-      );
+      alert(getErrorMessage(error));
     }
   };
 
