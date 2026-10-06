@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-const API = "http://127.0.0.1:8000";
+import API from "../api/axios";
 
 function AdminApplication() {
   const { id } = useParams();
@@ -11,15 +10,15 @@ function AdminApplication() {
 
   useEffect(() => {
     fetchApplication();
-  }, []);
+  }, [id]);
 
   const fetchApplication = async () => {
     try {
-      const res = await fetch(`${API}/admin/application/${id}`);
-      const data = await res.json();
-      setApplication(data);
+      const response = await API.get(`/admin/application/${id}`);
+      setApplication(response.data);
     } catch (err) {
       console.log(err);
+      setApplication(null);
     } finally {
       setLoading(false);
     }
@@ -27,9 +26,7 @@ function AdminApplication() {
 
   const verifyDocuments = async () => {
     try {
-      await fetch(`${API}/admin/verify/${id}`, {
-        method: "POST",
-      });
+      await API.post(`/admin/verify/${id}`);
 
       fetchApplication();
       alert("Documents Verified Successfully");
@@ -40,15 +37,9 @@ function AdminApplication() {
 
   const approveLoan = async () => {
     try {
-      const response = await fetch(`${API}/admin/approve/${id}`, {
-  method: "POST",
-});
-
-if (response.ok) {
-  await fetchApplication();
-  window.location.reload();
-  alert("Loan Approved Successfully");
-}
+      await API.post(`/admin/approve/${id}`);
+      await fetchApplication();
+      alert("Loan Approved Successfully");
     } catch (err) {
       console.log(err);
     }
@@ -56,15 +47,9 @@ if (response.ok) {
 
  const rejectLoan = async () => {
   try {
-    const response = await fetch(`${API}/admin/reject/${id}`, {
-      method: "POST",
-    });
-
-    if (response.ok) {
+    await API.post(`/admin/reject/${id}`);
       await fetchApplication();
-      window.location.reload();
       alert("Loan Rejected Successfully");
-    }
   } catch (err) {
     console.log(err);
   }
@@ -285,13 +270,7 @@ if (response.ok) {
             >
               <h3>{doc.document_type}</h3>
 
-              <a
-                href={`${API}/${doc.file_path}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                📄 View Document
-              </a>
+              <p>📄 {doc.original_filename}</p>
 
               <p style={{ marginTop: 10 }}>
   <b>Status:</b>{" "}

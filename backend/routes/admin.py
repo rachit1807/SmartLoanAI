@@ -105,21 +105,44 @@ def get_application(
 
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
-    print("AI REASONS:", application.ai_reasons)
-    print("AI SUGGESTIONS:", application.ai_suggestions)
+    documents = (
+        db.query(LoanDocument)
+        .filter(LoanDocument.application_id == application_id)
+        .order_by(LoanDocument.uploaded_at.desc())
+        .all()
+    )
+
     return {
-    "id": application.id,
-    "status": application.status,
-    "approval_probability": application.approval_probability,
-    "risk_level": application.risk_level,
-    "financial_score": application.financial_score,
-    "financial_health": application.financial_health,
-    "ai_reasons": json.loads(application.ai_reasons) if application.ai_reasons else [],
-    "ai_suggestions": json.loads(application.ai_suggestions) if application.ai_suggestions else [],
-    "monthly_emi": application.monthly_emi,
-    "total_interest": application.total_interest,
-    "total_payment": application.total_payment,
-}
+        "id": application.id,
+        "user_id": application.user_id,
+        "income": application.income,
+        "loan_amount": application.loan_amount,
+        "property_area": application.property_area,
+        "employment_status": application.employment_status,
+        "credit_history": application.credit_history,
+        "status": application.status,
+        "review_status": application.review_status,
+        "approval_probability": application.approval_probability,
+        "risk_level": application.risk_level,
+        "financial_score": application.financial_score,
+        "financial_health": application.financial_health,
+        "ai_reasons": json.loads(application.ai_reasons) if application.ai_reasons else [],
+        "ai_suggestions": json.loads(application.ai_suggestions) if application.ai_suggestions else [],
+        "monthly_emi": application.monthly_emi,
+        "total_interest": application.total_interest,
+        "total_payment": application.total_payment,
+        "documents": [
+            {
+                "id": document.id,
+                "document_type": document.document_type,
+                "original_filename": document.original_filename,
+                "verification_status": document.verification_status,
+                "review_note": document.review_note,
+                "uploaded_at": document.uploaded_at,
+            }
+            for document in documents
+        ],
+    }
 
 
 from datetime import datetime
