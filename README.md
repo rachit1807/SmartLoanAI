@@ -15,6 +15,14 @@ A modern **Full Stack AI-powered Loan Approval System** built using **React**, *
 
 The system allows users to apply for loans online while providing administrators with an intelligent dashboard to review applications, verify uploaded documents, analyze AI predictions, and approve or reject loan requests.
 
+### 🌐 Live Demo
+
+- **SmartLoan AI Website:** [https://smart-loan-ai-one.vercel.app](https://smart-loan-ai-one.vercel.app)
+- **Admin Dashboard:** [https://smart-loan-ai-one.vercel.app/admin-dashboard](https://smart-loan-ai-one.vercel.app/admin-dashboard)
+- **Backend API:** [https://smartloanai-api.onrender.com](https://smartloanai-api.onrender.com)
+
+> This is an educational demonstration project. Please use sample data and documents only.
+
 ---
 
 ### 👨‍💻 Developed By
