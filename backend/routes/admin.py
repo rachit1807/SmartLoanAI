@@ -4,7 +4,10 @@ import json
 import re
 from pathlib import Path
 
-from PyPDF2 import PdfReader
+try:
+    from PyPDF2 import PdfReader
+except ImportError:  # Keep the loan API available if optional PDF extraction is unavailable.
+    PdfReader = None
 
 from database import SessionLocal
 from models import LoanApplication, LoanDocument, User
@@ -18,11 +21,21 @@ router = APIRouter(
 UPLOAD_DIRECTORY = Path(__file__).resolve().parent.parent / "uploads"
 
 
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 def _normalise(value):
     return re.sub(r"[^a-z0-9]", "", str(value or "").lower())
 
 
 def _extract_pdf_text(path):
+    if PdfReader is None:
+        return ""
     try:
         reader = PdfReader(str(path))
         return " ".join((page.extract_text() or "") for page in reader.pages)[:20_000]
@@ -53,7 +66,10 @@ def document_consistency(application_id: int, db: Session = Depends(get_db)):
         text = _extract_pdf_text(UPLOAD_DIRECTORY / document.stored_filename)
         if not text.strip():
             item["status"] = "Unreadable"
-            item["findings"].append("No readable text was found. This may be a scanned PDF; review it manually.")
+            if PdfReader is None:
+                item["findings"].append("PDF text extraction is unavailable on this server. Review this document manually.")
+            else:
+                item["findings"].append("No readable text was found. This may be a scanned PDF; review it manually.")
             results.append(item)
             continue
 
@@ -82,18 +98,6 @@ def document_consistency(application_id: int, db: Session = Depends(get_db)):
         results.append(item)
 
     return {"application_id": application.id, "summary": "Automated text checks completed. A human reviewer retains the final decision.", "documents": results}
-
-
-# -------------------------
-# Database
-# -------------------------
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 # -------------------------
