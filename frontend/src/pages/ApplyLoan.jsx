@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, CircleDollarSign, Lightbulb, ShieldCheck, Sparkles, XCircle } from "lucide-react";
+import { CheckCircle, CircleDollarSign, FileText, Lightbulb, Printer, ShieldCheck, SlidersHorizontal, Sparkles, XCircle } from "lucide-react";
 import API from "../api/axios";
 import "../App.css";
 
@@ -19,7 +19,7 @@ const list = (value) => {
       if (Array.isArray(parsed)) {
         return parsed;
       }
-    } catch (e) {
+    } catch {
       // Ignore JSON parse error
     }
 
@@ -44,6 +44,9 @@ function ApplyLoan() {
   const [error, setError] = useState("");
   const [emiData, setEmiData] = useState({ amount:"", rate:"", tenure:"" });
   const [emi, setEmi] = useState(0);
+  const [simulation, setSimulation] = useState(null);
+  const [simulationLoading, setSimulationLoading] = useState(false);
+  const [simulationError, setSimulationError] = useState("");
 
   const handleChange = event => setFormData(current => ({ ...current, [event.target.name]:event.target.value }));
   const handleEmiChange = event => setEmiData(current => ({ ...current, [event.target.name]:event.target.value }));
@@ -53,12 +56,28 @@ function ApplyLoan() {
     const monthlyRate = rate / 1200;
     setEmi(Math.round(principal * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1)));
   };
+  const loanDataFromForm = () => ({ user_id:JSON.parse(localStorage.getItem("user") || "null")?.user_id, age:Number(formData.age), gender:formData.gender, married:formData.married, education:formData.education, employment_status:formData.employment_status, income:Number(formData.income), coapplicant_income:Number(formData.coapplicant_income), loan_amount:Number(formData.loan_amount), loan_term:Number(formData.loan_term), credit_history:formData.credit_history, property_area:formData.property_area });
+  const runSimulation = async () => {
+    setSimulationError("");
+    setSimulation(null);
+    const missing = Object.entries(formData).filter(([, value]) => value === "").map(([key]) => key.replaceAll("_", " "));
+    if (missing.length) {
+      setSimulationError(`Complete the application fields before previewing: ${missing.join(", ")}.`);
+      return;
+    }
+    setSimulationLoading(true);
+    try {
+      const response = await API.post("/loans/simulate", loanDataFromForm());
+      setSimulation(response.data);
+    } catch (requestError) {
+      const detail = requestError.response?.data?.detail;
+      setSimulationError(typeof detail === "string" ? detail : "Could not calculate the simulation. Please check the entered values.");
+    } finally { setSimulationLoading(false); }
+  };
   const handleSubmit = async event => {
     event.preventDefault(); setLoading(true); setError(""); setResult(null);
     try {
-      const storedUser = localStorage.getItem("user");
-      const user = storedUser ? JSON.parse(storedUser) : null;
-      const loanData = { user_id:user?.user_id, age:Number(formData.age), gender:formData.gender, married:formData.married, education:formData.education, employment_status:formData.employment_status, income:Number(formData.income), coapplicant_income:Number(formData.coapplicant_income), loan_amount:Number(formData.loan_amount), loan_term:Number(formData.loan_term), credit_history:formData.credit_history, property_area:formData.property_area };
+      const loanData = loanDataFromForm();
       const response = await API.post("/loans/apply", loanData);
       setResult(response.data);
     } catch (requestError) {
@@ -94,15 +113,20 @@ console.log("SUGGESTIONS ARRAY:", suggestions);
         <Choice name="credit_history" label="Credit History" values={["Good","Bad"]} data={formData} onChange={handleChange} />
         <Choice name="property_area" label="Property Area" values={["Urban","Semiurban","Rural"]} data={formData} onChange={handleChange} />
       </div>
-      <button type="submit" className="predict-btn" disabled={loading}>{loading ? "Processing AI..." : "Predict Loan Approval"}</button>
+      <div style={styles.actions}>
+        <button type="button" className="emi-btn" onClick={runSimulation} disabled={simulationLoading}><SlidersHorizontal size={18} />{simulationLoading ? "Calculating preview..." : "Preview affordability & AI assessment"}</button>
+        <button type="submit" className="predict-btn" disabled={loading}>{loading ? "Submitting..." : "Submit application"}</button>
+      </div>
     </form>
     {error && <p role="alert" style={styles.error}>{error}</p>}
+    {simulationError && <p role="alert" style={styles.error}>{simulationError}</p>}
+    {simulation && <DecisionReceipt result={simulation} formData={formData} simulated />}
     {result && <section className={`ai-result ${isApproved ? "approved" : "rejected"}`} style={styles.result}>
       <div style={styles.top}>{isApproved ? <CheckCircle size={45} /> : <XCircle size={45} />}<div><p style={styles.label}>LOAN PREDICTION RESULT</p><h2 style={styles.status}>Status: {result.status || "Completed"}</h2></div></div>
       {result.application_id && <p>Application ID: {result.application_id}</p>}
       <div style={styles.grid}><Metric label="Approval Probability" value={percent(result.approval_probability)} /><Metric label="Risk Level" value={result.risk_level || "Not available"} /><Metric label="Financial Score" value={result.financial_score ?? "Not available"} /><Metric label="Financial Health" value={result.financial_health || "Not available"} /></div>
       <div className="approval-bar" aria-label={`Approval probability: ${percent(result.approval_probability)}`}><div style={{ width:`${probability}%` }} /></div>
-      <div style={styles.emiSummary}><h3 style={styles.summaryTitle}><CircleDollarSign size={21} /> Backend repayment estimate</h3><div style={styles.grid}><Metric label="Monthly EMI" value={money(result.monthly_emi)} /><Metric label="Total Interest" value={money(result.total_interest)} /><Metric label="Total Payment" value={money(result.total_payment)} /></div></div>
+      <p style={styles.notice}>Application submitted for document review. AI assessment and final approval are performed by the authorised reviewer after verification.</p>
       {(reasons.length > 0 || suggestions.length > 0) && <div style={styles.insights}>{reasons.length > 0 && <Insight title="Why this decision" icon={<ShieldCheck size={19} />} items={reasons} />}{suggestions.length > 0 && <Insight title="AI suggestions" icon={<Lightbulb size={19} />} items={suggestions} />}</div>}
     </section>}
     <div className="emi-card"><h2>EMI Calculator</h2><div className="emi-grid"><input name="amount" type="number" min="1" placeholder="Loan Amount" value={emiData.amount} onChange={handleEmiChange} /><input name="rate" type="number" min="0" step="0.01" placeholder="Interest Rate %" value={emiData.rate} onChange={handleEmiChange} /><input name="tenure" type="number" min="1" placeholder="Tenure Months" value={emiData.tenure} onChange={handleEmiChange} /></div><button type="button" className="emi-btn" onClick={calculateEMI}>Calculate EMI</button>{emi > 0 && <p className="emi-result">Monthly EMI: ₹ {emi.toLocaleString("en-IN")}</p>}</div>
@@ -111,6 +135,19 @@ console.log("SUGGESTIONS ARRAY:", suggestions);
 }
 function Choice({ name, label, values, data, onChange }) { return <select name={name} value={data[name]} onChange={onChange} required><option value="">{label}</option>{values.map(value => <option key={value} value={value}>{value}</option>)}</select>; }
 function Metric({ label, value }) { return <div style={styles.metric}><p style={styles.metricLabel}>{label}</p><strong style={styles.metricValue}>{value}</strong></div>; }
+function DecisionReceipt({ result, formData }) {
+  const signals = list(result.ai_reasons);
+  const suggestions = list(result.ai_suggestions);
+  const printReceipt = () => window.print();
+  return <section className="decision-receipt" style={styles.receipt}>
+    <div style={styles.receiptHead}><div><p style={styles.eyebrow}><FileText size={16} /> AI DECISION RECEIPT</p><h2 style={{ margin:"0 0 6px" }}>Loan recovery & affordability preview</h2><p style={{ margin:0, color:"#475569" }}>Generated {new Date().toLocaleString("en-IN")}</p></div><button type="button" onClick={printReceipt} style={styles.print}><Printer size={17} /> Print / Save PDF</button></div>
+    <p style={styles.notice}>{result.simulation_notice}</p>
+    <div style={styles.grid}><Metric label="AI Recommendation" value={result.status} /><Metric label="Approval likelihood" value={percent(result.approval_probability)} /><Metric label="Risk indicator" value={result.risk_level} /><Metric label="Financial score" value={result.financial_score} /></div>
+    <div style={styles.emiSummary}><h3 style={styles.summaryTitle}><CircleDollarSign size={21} /> Simulated repayment estimate</h3><div style={styles.grid}><Metric label="Monthly EMI" value={money(result.monthly_emi)} /><Metric label="Total interest" value={money(result.total_interest)} /><Metric label="Total repayment" value={money(result.total_payment)} /><Metric label="Requested term" value={`${formData.loan_term} months`} /></div></div>
+    <div style={styles.insights}>{signals.length > 0 && <Insight title="Model-aligned factors" icon={<ShieldCheck size={19} />} items={signals} />}{suggestions.length > 0 && <Insight title="Safer next steps" icon={<Lightbulb size={19} />} items={suggestions} />}</div>
+    <div style={styles.limits}><strong>Limits and human review</strong><ul>{(result.model_limitations || []).map((item, index) => <li key={index}>{item}</li>)}</ul><p>The simulation only changes the amount and term you entered. Never provide inaccurate financial information to improve a result.</p></div>
+  </section>;
+}
 function Insight({ title, icon, items }) {
   return (
     <div style={styles.insight}>
@@ -163,6 +200,12 @@ const styles = {
     padding: 12,
     marginTop: 18,
   },
+  actions: { display:"flex", gap:12, flexWrap:"wrap", marginTop:18 },
+  receipt: { marginTop:28, padding:24, borderRadius:16, background:"#f8fbff", border:"1px solid #bfdbfe", textAlign:"left" },
+  receiptHead: { display:"flex", justifyContent:"space-between", gap:16, flexWrap:"wrap", alignItems:"flex-start" },
+  print: { display:"inline-flex", alignItems:"center", gap:7, border:"1px solid #2563eb", color:"#1d4ed8", background:"white", padding:"10px 14px", borderRadius:9, fontWeight:700, cursor:"pointer" },
+  notice: { background:"#eff6ff", border:"1px solid #bfdbfe", color:"#1e3a8a", borderRadius:10, padding:12, lineHeight:1.5, margin:"18px 0" },
+  limits: { marginTop:18, background:"#fffbeb", border:"1px solid #fde68a", color:"#713f12", borderRadius:10, padding:14, lineHeight:1.5 },
 
   result: {
     marginTop: 28,

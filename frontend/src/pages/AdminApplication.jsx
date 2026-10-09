@@ -7,6 +7,9 @@ function AdminApplication() {
 
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [consistency, setConsistency] = useState(null);
+  const [consistencyLoading, setConsistencyLoading] = useState(false);
+  const [consistencyError, setConsistencyError] = useState("");
 
   useEffect(() => {
     fetchApplication();
@@ -32,6 +35,19 @@ function AdminApplication() {
       alert("Documents Verified Successfully");
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  const checkDocumentConsistency = async () => {
+    setConsistencyLoading(true);
+    setConsistencyError("");
+    try {
+      const response = await API.get(`/admin/application/${id}/document-consistency`);
+      setConsistency(response.data);
+    } catch (error) {
+      setConsistencyError(error.response?.data?.detail || "Could not check document consistency.");
+    } finally {
+      setConsistencyLoading(false);
     }
   };
 
@@ -256,6 +272,28 @@ function AdminApplication() {
         }}
       >
         <h2>📂 Uploaded Documents</h2>
+
+        <button
+          type="button"
+          onClick={checkDocumentConsistency}
+          disabled={consistencyLoading || application.documents?.length === 0}
+          style={{ background: "#2563eb", color: "#fff", border: "none", padding: "11px 16px", borderRadius: 9, fontWeight: 700, cursor: "pointer", marginBottom: 16 }}
+        >
+          {consistencyLoading ? "Checking document text..." : "Check document consistency"}
+        </button>
+        {consistencyError && <p style={{ color: "#b91c1c" }}>{consistencyError}</p>}
+        {consistency && (
+          <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: 12, padding: 16, marginBottom: 18 }}>
+            <h3 style={{ marginTop: 0 }}>Consistency check</h3>
+            <p style={{ color: "#475569" }}>{consistency.summary}</p>
+            {consistency.documents.map((document) => (
+              <div key={document.document_id} style={{ borderTop: "1px solid #e2e8f0", paddingTop: 12, marginTop: 12 }}>
+                <strong>{document.document_type}: {document.status}</strong>
+                <ul>{document.findings.map((finding, index) => <li key={index}>{finding}</li>)}</ul>
+              </div>
+            ))}
+          </div>
+        )}
 
         {application.documents?.length > 0 ? (
           application.documents.map((doc) => (

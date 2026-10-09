@@ -11,6 +11,52 @@ router = APIRouter(
 )
 
 
+def validate_simulation_input(data):
+    """Validate a non-persistent affordability simulation request."""
+    required = {
+        "age", "gender", "married", "education", "employment_status", "income",
+        "coapplicant_income", "loan_amount", "loan_term", "credit_history", "property_area",
+    }
+    missing = [field for field in required if data.get(field) in (None, "")]
+    if missing:
+        raise HTTPException(status_code=422, detail=f"Missing required fields: {', '.join(missing)}")
+
+    try:
+        age = int(data["age"])
+        income = float(data["income"])
+        co_income = float(data["coapplicant_income"])
+        amount = float(data["loan_amount"])
+        term = int(data["loan_term"])
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=422, detail="Age, income, loan amount, and term must be valid numbers.")
+
+    if not 18 <= age <= 100:
+        raise HTTPException(status_code=422, detail="Age must be between 18 and 100.")
+    if income < 0 or co_income < 0 or not 1_000 <= amount <= 10_000_000 or not 6 <= term <= 480:
+        raise HTTPException(status_code=422, detail="Use non-negative income, a loan amount from ₹1,000 to ₹1,00,00,000, and a term from 6 to 480 months.")
+
+
+@router.post("/simulate")
+def simulate_loan(loan_data: dict):
+    """Run an explanatory, non-persistent eligibility and repayment simulation."""
+    validate_simulation_input(loan_data)
+    try:
+        result = predict_loan(loan_data)
+        result.update({
+            "simulation": True,
+            "simulation_notice": "This is an educational AI pre-screening estimate. It does not submit an application, guarantee approval, or replace a bank's final decision.",
+            "model_limitations": [
+                "The result depends only on the fields entered and the project training data.",
+                "A bank or authorised reviewer makes the final approval decision after document and policy checks.",
+            ],
+        })
+        return result
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception:
+        raise HTTPException(status_code=500, detail="The simulation could not be calculated. Please try again.")
+
+
 # ==========================
 # DATABASE CONNECTION
 # ==========================

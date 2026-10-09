@@ -703,6 +703,33 @@ Based on these inputs, the system predicts:
 
 ---
 
+# 🧾 Explainability, Recovery Simulation & Document Consistency
+
+## Loan Recovery & Affordability Simulator
+
+Before submitting, an applicant can adjust the requested amount and repayment term and generate a non-persistent preview. The preview calculates EMI, total interest, total repayment, and a model-based pre-screening recommendation. It never changes an application, guarantees approval, or replaces a bank review.
+
+## Explainable AI Decision Receipt
+
+The simulator generates a printable receipt with a timestamp, AI recommendation, approval likelihood, risk indicator, financial score, repayment figures, model-aligned factors, safer next steps, and limitations. Explanations come from the project's implemented financial-health rules and probability output; this project does **not** claim SHAP or LIME implementation.
+
+## Document Consistency Detector
+
+The Admin Review page can run an advisory comparison for text-based PDFs. It checks detectable applicant-name and declared-income values against application data and keeps the output limited to findings rather than exposing full document text. A discrepancy is not fraud detection and cannot automatically approve or reject a loan. Scanned/image files are marked for manual review.
+
+### New API endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/loans/simulate` | Validated, non-persistent affordability and AI pre-screening preview |
+| GET | `/admin/application/{id}/document-consistency` | Advisory text-based PDF consistency results |
+
+### Setup and limitations
+
+Install backend dependencies with `pip install -r backend/requirements.txt`; `PyPDF2` enables PDF text extraction. The detector cannot OCR scanned PDFs, PNGs, or JPGs. The free deployment uses temporary SQLite/file storage, so data/uploads may not persist across redeployments. Admin endpoints remain a college-demo workflow and need authentication/role checks before real use.
+
+---
+
 # 💼 Skills Demonstrated
 
 This project demonstrates practical knowledge of:

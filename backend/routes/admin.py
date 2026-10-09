@@ -1,15 +1,87 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import json
+import re
+from pathlib import Path
+
+from PyPDF2 import PdfReader
 
 from database import SessionLocal
-from models import LoanApplication, LoanDocument
+from models import LoanApplication, LoanDocument, User
 from prediction import predict_loan
 
 router = APIRouter(
     prefix="/admin",
     tags=["Admin"]
 )
+
+UPLOAD_DIRECTORY = Path(__file__).resolve().parent.parent / "uploads"
+
+
+def _normalise(value):
+    return re.sub(r"[^a-z0-9]", "", str(value or "").lower())
+
+
+def _extract_pdf_text(path):
+    try:
+        reader = PdfReader(str(path))
+        return " ".join((page.extract_text() or "") for page in reader.pages)[:20_000]
+    except Exception:
+        return ""
+
+
+@router.get("/application/{application_id}/document-consistency")
+def document_consistency(application_id: int, db: Session = Depends(get_db)):
+    """Compare text extractable PDFs with declared data; never makes an automatic decision."""
+    application = db.query(LoanApplication).filter(LoanApplication.id == application_id).first()
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    applicant = db.query(User).filter(User.id == application.user_id).first()
+    documents = db.query(LoanDocument).filter(LoanDocument.application_id == application_id).all()
+    results = []
+
+    for document in documents:
+        suffix = Path(document.stored_filename).suffix.lower()
+        item = {"document_id": document.id, "document_type": document.document_type, "filename": document.original_filename, "status": "Needs review", "findings": []}
+        if suffix != ".pdf":
+            item["status"] = "Unsupported for text comparison"
+            item["findings"].append("Only text-based PDF files can be checked in this demo. Scanned images require human review.")
+            results.append(item)
+            continue
+
+        text = _extract_pdf_text(UPLOAD_DIRECTORY / document.stored_filename)
+        if not text.strip():
+            item["status"] = "Unreadable"
+            item["findings"].append("No readable text was found. This may be a scanned PDF; review it manually.")
+            results.append(item)
+            continue
+
+        checks = 0
+        matches = 0
+        if applicant and applicant.name:
+            checks += 1
+            if _normalise(applicant.name) in _normalise(text):
+                matches += 1
+                item["findings"].append("Applicant name appears in the document text.")
+            else:
+                item["findings"].append("Applicant name was not detected; confirm manually.")
+
+        if document.document_type in {"Income Proof", "Salary Slip", "Bank Statement"}:
+            checks += 1
+            digits = re.sub(r"[^0-9]", "", str(int(application.income)))
+            text_digits = re.sub(r"[^0-9]", "", text)
+            if digits in text_digits:
+                matches += 1
+                item["findings"].append("Declared monthly income value appears in the document text.")
+            else:
+                item["findings"].append("Declared monthly income value was not detected; confirm manually.")
+
+        item["status"] = "No automated discrepancy found" if checks and matches == checks else "Needs review"
+        item["findings"].append("This comparison is advisory only. It is not fraud detection and must not determine approval automatically.")
+        results.append(item)
+
+    return {"application_id": application.id, "summary": "Automated text checks completed. A human reviewer retains the final decision.", "documents": results}
 
 
 # -------------------------
