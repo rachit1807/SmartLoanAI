@@ -83,14 +83,14 @@ function AdminDashboard() {
 
   if (loading) {
     return (
-      <h2
+      <div className="bank-admin-page"><AdminNav /><h2
         style={{
           textAlign: "center",
           marginTop: 100,
         }}
       >
         Loading Dashboard...
-      </h2>
+      </h2></div>
     );
   }
 

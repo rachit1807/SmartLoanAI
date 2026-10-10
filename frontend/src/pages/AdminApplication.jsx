@@ -74,17 +74,17 @@ function AdminApplication() {
 
   if (loading) {
     return (
-      <h2 style={{ textAlign: "center", marginTop: 100 }}>
+      <div className="bank-admin-page"><AdminNav /><h2 style={{ textAlign: "center", marginTop: 100 }}>
         Loading...
-      </h2>
+      </h2></div>
     );
   }
 
   if (!application) {
     return (
-      <h2 style={{ textAlign: "center", marginTop: 100 }}>
+      <div className="bank-admin-page"><AdminNav /><h2 style={{ textAlign: "center", marginTop: 100 }}>
         Application not found
-      </h2>
+      </h2></div>
     );
   }
 

@@ -76,6 +76,8 @@ Administrators can review every application, verify uploaded documents, analyze 
 
 ## Banking-style portal interface
 
+The admin dashboard and application review pages include a Light theme / Dark theme switch in the operations navigation. The preference is saved in the browser and shared with the applicant portal. Dark styles cover review cards, assessment values, search fields and application tables without changing loan decisions or document verification.
+
 The applicant and operations portals use a consistent navy, teal and white design with compact cards, clear navigation, labelled application fields and readable tables. The layout adapts to desktop and mobile screens.
 
 Shared styles explicitly set navigation flow, input/select sizing and primary/secondary button contrast so the application form keeps its navigation above the content and action labels remain readable.

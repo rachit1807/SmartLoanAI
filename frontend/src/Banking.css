@@ -96,3 +96,16 @@
 .dark-mode .loan-page :is(.decision-receipt,.ai-result) [style*="background"] { background:#294652 !important; color:#e3edf2 !important; }
 .dark-mode .loan-page :is(.decision-receipt,.ai-result) :is(p,strong,h2,h3,li) { color:#e3edf2 !important; }
 @media print { .main-navbar { display:none !important; } }
+
+/* Operations theme also covers the review screen's inline card styles. */
+.dark-mode .bank-admin-page .bank-admin-heading,
+.dark-mode .bank-admin-page div[style*="background: rgb(255, 255, 255)"],
+.dark-mode .bank-admin-page div[style*="background: rgb(248, 250, 252)"] { background:#203744 !important; border-color:#39515d !important; color:#e3edf2 !important; }
+.dark-mode .bank-admin-page :is(h1,h2,h3,h4,p,strong,b,li) { color:#e3edf2 !important; }
+.dark-mode .bank-admin-page :is(input,select,textarea) { background:#203744 !important; color:#e3edf2 !important; border-color:#526b78 !important; color-scheme:dark; }
+.dark-mode .bank-admin-page input::placeholder { color:#afc2cd; opacity:1; }
+.dark-mode .bank-admin-page table td { background:#203744 !important; color:#e3edf2 !important; border-color:#39515d !important; }
+.dark-mode .bank-admin-page table :is(thead,th) { background:#294652 !important; color:#e3edf2 !important; border-color:#526b78 !important; }
+.dark-mode .bank-admin-page .bank-admin-table { border-color:#39515d; }
+.dark-mode .bank-admin-page a:not(.nav-logo):not(.nav-links a) { color:#9cd5e2; }
+.dark-mode .bank-admin-page div[style*="border:"] { border-color:#39515d !important; }
