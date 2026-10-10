@@ -1,0 +1,39 @@
+.bank-auth-page { min-height:100vh; padding:48px 24px; display:flex; align-items:center; justify-content:center; background:#eef1f4; color:#182b3a; }
+.bank-auth-shell { width:100%; max-width:1080px; min-height:640px; display:grid; grid-template-columns:1fr 1fr; background:#fff; border:1px solid #dce2e7; border-radius:8px; overflow:hidden; box-shadow:0 12px 38px rgba(23,42,59,.07); }
+.bank-auth-intro { background:#163646; color:#fff; padding:48px; display:flex; flex-direction:column; justify-content:space-between; border-top:5px solid #bda46b; }
+.bank-brand, .bank-mobile-brand { display:flex; align-items:center; gap:12px; font-size:25px; font-weight:700; }
+.bank-brand-mark { width:43px; height:43px; display:inline-flex; align-items:center; justify-content:center; border:1px solid #78919c; border-radius:5px; color:#e0c995; flex-shrink:0; }
+.bank-auth-intro-copy { margin:60px 0; }
+.bank-eyebrow { margin:0 0 18px; font-size:11px; font-weight:700; letter-spacing:2px; color:#677d8a; }
+.bank-auth-intro .bank-eyebrow { color:#d6c59c; }
+.bank-auth-intro h1 { font-size:40px; line-height:1.18; letter-spacing:-1.3px; margin:0 0 24px; font-weight:600; }
+.bank-auth-intro-copy > p:last-child { font-size:16px; line-height:1.75; color:#cfdae0; margin:0; }
+.bank-security-note { display:flex; align-items:flex-start; gap:12px; font-size:12px; line-height:1.6; color:#c4d2d9; padding-top:24px; border-top:1px solid #365361; }
+.bank-security-note svg { flex-shrink:0; margin-top:2px; }
+.bank-auth-panel { padding:64px 54px 44px; align-self:center; }
+.bank-mobile-brand { display:none; }
+.bank-auth-heading h2 { margin:0 0 12px; font-size:29px; line-height:1.25; letter-spacing:-.8px; color:#182b3a; }
+.bank-auth-heading > p:last-child { margin:0; font-size:14px; line-height:1.6; color:#6b7882; }
+.bank-auth-form { margin-top:32px; }
+.bank-field { margin-bottom:22px; }
+.bank-field label { display:block; margin-bottom:9px; font-size:13px; font-weight:600; color:#344956; }
+.bank-input-wrap { display:flex; align-items:center; gap:12px; min-height:50px; border:1px solid #cbd4da; border-radius:4px; padding:0 14px; background:#fff; color:#71828c; }
+.bank-input-wrap:focus-within { border-color:#236b7c; box-shadow:0 0 0 3px rgba(35,107,124,.12); }
+.bank-input-wrap input { width:100%; min-width:0; padding:15px 0; border:0; outline:0; background:transparent; font-size:14px; color:#182b3a; }
+.bank-input-wrap input::placeholder { color:#99a3aa; }
+.bank-primary-button { width:100%; min-height:50px; display:flex; align-items:center; justify-content:center; gap:14px; padding:14px 20px; border:0; border-radius:4px; background:#175668; color:#fff; font-size:14px; font-weight:600; cursor:pointer; }
+.bank-primary-button:hover { background:#124757; }
+.bank-primary-button:disabled { opacity:.65; cursor:wait; }
+.bank-primary-button:focus-visible, .bank-auth-switch button:focus-visible { outline:3px solid #bda46b; outline-offset:3px; }
+.bank-auth-switch { margin:28px 0 0; padding-top:25px; border-top:1px solid #e6eaed; color:#76838c; font-size:13px; line-height:1.8; }
+.bank-auth-switch button { border:0; background:transparent; padding:0 0 0 4px; color:#175668; font-size:inherit; font-weight:600; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+.bank-form-error { padding:12px; background:#fff4f3; border:1px solid #edc8c4; border-radius:4px; color:#9e332b; font-size:13px; line-height:1.5; }
+@media (max-width:760px) {
+  .bank-auth-page { padding:24px 16px; }
+  .bank-auth-shell { display:block; max-width:480px; min-height:auto; border-top:4px solid #bda46b; }
+  .bank-auth-intro { display:none; }
+  .bank-auth-panel { padding:32px 28px; }
+  .bank-mobile-brand { display:flex; margin-bottom:38px; color:#163646; }
+  .bank-mobile-brand .bank-brand-mark { color:#175668; border-color:#cbd4da; }
+  .bank-auth-heading h2 { font-size:27px; }
+}
