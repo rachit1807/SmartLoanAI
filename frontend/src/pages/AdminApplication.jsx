@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import API from "../api/axios";
+import AdminNav from "../components/AdminNav";
 
 function AdminApplication() {
   const { id } = useParams();
@@ -89,15 +90,18 @@ function AdminApplication() {
 
   return (
     <div
+      className="bank-admin-page"
       style={{
         minHeight: "100vh",
         background: "#f4f7fb",
         padding: "40px",
       }}
     >
+      <AdminNav />
       {/* Header */}
 
       <div
+        className="bank-admin-heading"
         style={{
           background: "linear-gradient(135deg,#1e3c72,#2a5298)",
           color: "#fff",
@@ -108,7 +112,7 @@ function AdminApplication() {
         }}
       >
         <h1 style={{ margin: 0, fontSize: 34 }}>
-          🏦 Admin Loan Review
+          Application review
         </h1>
 
         <p
@@ -134,7 +138,7 @@ function AdminApplication() {
           marginBottom: 30,
         }}
       >
-        <h2 style={{ marginBottom: 20 }}>📋 Application Details</h2>
+        <h2 style={{ marginBottom: 20 }}>Application details</h2>
 
         <div
           style={{
@@ -212,7 +216,7 @@ function AdminApplication() {
             marginBottom: 30,
           }}
         >
-          <h2>🤖 AI Prediction Report</h2>
+          <h2>Credit assessment</h2>
 
           <div
             style={{
@@ -271,7 +275,7 @@ function AdminApplication() {
           marginBottom: 30,
         }}
       >
-        <h2>📂 Uploaded Documents</h2>
+        <h2>Uploaded documents</h2>
 
         <button
           type="button"

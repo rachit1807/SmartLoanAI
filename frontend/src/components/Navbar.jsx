@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import "../App.css";
 
@@ -19,13 +19,13 @@ function Navbar() {
 
   return (
     <nav className="main-navbar">
-      <h2 className="nav-logo" onClick={() => navigate("/dashboard")}>SmartLoan AI</h2>
+      <h2 className="nav-logo" onClick={() => navigate("/dashboard")}>SmartLoan</h2>
       <div className="nav-links">
-        <button onClick={() => navigate("/dashboard")}>Dashboard</button>
-        <button onClick={() => navigate("/apply-loan")}>Apply Loan</button>
-        <button onClick={() => navigate("/document-verification")}>Documents</button>
-        <button onClick={() => navigate("/loan-history")}>Loan History</button>
-        <button className="theme-btn" onClick={() => setDark((current) => !current)}>{dark ? "☀️ Light" : "🌙 Dark"}</button>
+        <NavLink to="/dashboard">Overview</NavLink>
+        <NavLink to="/apply-loan">Apply for a loan</NavLink>
+        <NavLink to="/document-verification">Documents</NavLink>
+        <NavLink to="/loan-history">Applications</NavLink>
+        <button className="theme-btn" onClick={() => setDark((current) => !current)}>{dark ? "Light theme" : "Dark theme"}</button>
         <button className="logout-btn" onClick={logout}>Logout</button>
       </div>
     </nav>

@@ -75,8 +75,8 @@ function LoanHistory() {
     <div className="history-page">
       <Navbar />
       <div className="history-container">
-        <h1>Recent Loan Applications</h1>
-        <p className="subtitle">View your previous applications and their AI assessments.</p>
+        <h1>Your applications</h1>
+        <p className="subtitle">Review application status, repayment estimates and assessment details.</p>
 
         {error && <p role="alert" style={styles.error}><AlertCircle size={18} /> {error}</p>}
 

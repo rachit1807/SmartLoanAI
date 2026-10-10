@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, CircleDollarSign, FileText, Lightbulb, Printer, ShieldCheck, SlidersHorizontal, Sparkles, XCircle } from "lucide-react";
+import { CheckCircle, CircleDollarSign, FileText, Lightbulb, Printer, ShieldCheck, SlidersHorizontal, XCircle } from "lucide-react";
+import Navbar from "../components/Navbar";
 import API from "../api/axios";
 import "../App.css";
 
@@ -95,21 +96,21 @@ console.log("AI REASONS RAW:", result?.ai_reasons);
 console.log("AI SUGGESTIONS RAW:", result?.ai_suggestions);
 console.log("REASONS ARRAY:", reasons);
 console.log("SUGGESTIONS ARRAY:", suggestions);
-  return <div className="loan-page"><div className="loan-card-new">
-    <div style={styles.header}><div><p style={styles.eyebrow}><Sparkles size={16} /> SMARTLOAN AI</p><h1>AI Loan Application</h1><p className="subtitle">Get an instant AI-based loan prediction and repayment estimate.</p></div><ShieldCheck size={38} color="#2563eb" /></div>
+  return <div className="loan-page"><Navbar /><div className="loan-card-new">
+    <div style={styles.header}><div><p style={styles.eyebrow}>NEW APPLICATION</p><h1>Apply for a loan</h1><p className="subtitle">Provide your details, review repayment estimates and submit your application.</p></div><ShieldCheck size={30} color="#175668" /></div>
     <form className="loan-form" onSubmit={handleSubmit}>
       <h2>Personal Details</h2><div className="input-grid">
-        <input name="age" type="number" min="18" placeholder="Age" value={formData.age} onChange={handleChange} required />
+        <label>Age<input name="age" type="number" min="18" placeholder="Age" value={formData.age} onChange={handleChange} required /></label>
         <Choice name="gender" label="Gender" values={["Male","Female"]} data={formData} onChange={handleChange} />
         <Choice name="married" label="Married" values={["Yes","No"]} data={formData} onChange={handleChange} />
         <Choice name="education" label="Education" values={["Graduate","Not Graduate"]} data={formData} onChange={handleChange} />
       </div>
       <h2>Financial Details</h2><div className="input-grid">
         <Choice name="employment_status" label="Employment" values={["Employed","Self Employed"]} data={formData} onChange={handleChange} />
-        <input name="income" type="number" min="0" placeholder="Monthly Income" value={formData.income} onChange={handleChange} required />
-        <input name="coapplicant_income" type="number" min="0" placeholder="Coapplicant Income" value={formData.coapplicant_income} onChange={handleChange} required />
-        <input name="loan_amount" type="number" min="1" placeholder="Loan Amount" value={formData.loan_amount} onChange={handleChange} required />
-        <input name="loan_term" type="number" min="1" placeholder="Loan Term (Months)" value={formData.loan_term} onChange={handleChange} required />
+        <label>Monthly income (₹)<input name="income" type="number" min="0" placeholder="Monthly Income" value={formData.income} onChange={handleChange} required /></label>
+        <label>Co-applicant monthly income (₹)<input name="coapplicant_income" type="number" min="0" placeholder="Coapplicant Income" value={formData.coapplicant_income} onChange={handleChange} required /></label>
+        <label>Requested amount (₹)<input name="loan_amount" type="number" min="1" placeholder="Loan Amount" value={formData.loan_amount} onChange={handleChange} required /></label>
+        <label>Repayment term (months)<input name="loan_term" type="number" min="1" placeholder="Loan Term (Months)" value={formData.loan_term} onChange={handleChange} required /></label>
         <Choice name="credit_history" label="Credit History" values={["Good","Bad"]} data={formData} onChange={handleChange} />
         <Choice name="property_area" label="Property Area" values={["Urban","Semiurban","Rural"]} data={formData} onChange={handleChange} />
       </div>
@@ -133,7 +134,7 @@ console.log("SUGGESTIONS ARRAY:", suggestions);
     <button className="back-dashboard-btn" onClick={() => navigate("/dashboard")}>← Back to Dashboard</button>
   </div></div>;
 }
-function Choice({ name, label, values, data, onChange }) { return <select name={name} value={data[name]} onChange={onChange} required><option value="">{label}</option>{values.map(value => <option key={value} value={value}>{value}</option>)}</select>; }
+function Choice({ name, label, values, data, onChange }) { return <label>{label}<select name={name} value={data[name]} onChange={onChange} required><option value="">Select {label.toLowerCase()}</option>{values.map(value => <option key={value} value={value}>{value}</option>)}</select></label>; }
 function Metric({ label, value }) { return <div style={styles.metric}><p style={styles.metricLabel}>{label}</p><strong style={styles.metricValue}>{value}</strong></div>; }
 function DecisionReceipt({ result, formData }) {
   const signals = list(result.ai_reasons);

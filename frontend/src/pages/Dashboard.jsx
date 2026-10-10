@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertCircle, CircleDollarSign, ShieldCheck, Sparkles } from "lucide-react";
+import { AlertCircle, ShieldCheck } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import Navbar from "../components/Navbar";
@@ -82,9 +82,9 @@ function Dashboard() {
 
       <div style={styles.welcome}>
         <div>
-          <p style={styles.eyebrow}><Sparkles size={16} /> SMARTLOAN AI</p>
-          <h1>Welcome back{user.name ? `, ${user.name}` : ""} 👋</h1>
-          <p className="subtitle">Your AI-powered loan approval and risk overview.</p>
+          <p style={styles.eyebrow}>ACCOUNT OVERVIEW</p>
+          <h1>Welcome back{user.name ? `, ${user.name}` : ""}</h1>
+          <p className="subtitle">Manage your applications, documents and repayment planning.</p>
         </div>
         <button style={styles.applyButton} onClick={() => navigate("/apply-loan")}>Apply New Loan</button>
       </div>

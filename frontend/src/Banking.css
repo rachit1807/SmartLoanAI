@@ -1,0 +1,86 @@
+/* Shared lending portal design. Scoped to operational screens. */
+:is(.dashboard,.history-page,.loan-page,.bank-admin-page,.bank-upload-page) { background:#eef1f4 !important; color:#263d49; min-height:100vh; }
+.main-navbar { margin:0 !important; padding:20px max(24px,calc((100vw - 1200px)/2)) !important; background:#163646 !important; border-radius:0 !important; box-shadow:none !important; border-bottom:3px solid #bda46b; color:white; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+.main-navbar .nav-logo { font-size:24px !important; color:white; margin:0; cursor:pointer; white-space:nowrap; }
+.main-navbar .nav-links { display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+.main-navbar .nav-links a,.main-navbar .nav-links button { font-size:13px !important; font-weight:500; color:#dce7eb !important; background:transparent !important; border:0; border-radius:3px; padding:10px 12px; cursor:pointer; text-decoration:none; }
+.main-navbar .nav-links a.active { background:#2b4b5a !important; color:white !important; box-shadow:inset 0 -2px #bda46b; }
+.main-navbar .nav-links a:hover,.main-navbar .nav-links button:hover { background:#274858 !important; }
+.dashboard > div:not(.main-navbar),.dashboard > p,.history-container { max-width:1200px; margin:28px auto !important; padding:0 24px; }
+.dashboard > div:first-of-type { padding-top:10px; }
+.dashboard h1,.history-container h1,.loan-card-new h1 { font-size:30px !important; font-weight:600; letter-spacing:-.6px; margin:0 0 10px !important; color:#163646; }
+.dashboard .subtitle,.history-container .subtitle,.loan-card-new .subtitle { font-size:14px !important; line-height:1.6; margin:0 !important; color:#697e89; }
+.dashboard .stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
+.dashboard .stat-card { background:white; border:1px solid #dce3e7; border-top:3px solid #bda46b; border-radius:5px; box-shadow:none; padding:24px; }
+.dashboard .stat-card h3 { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.7px; margin:0 0 18px; color:#647984; }
+.dashboard .stat-card p { font-size:32px; font-weight:600; color:#163646; }
+.dashboard :is(.profile-card,.recent-loans-card) { background:white; border:1px solid #dce3e7; border-radius:5px; box-shadow:none; padding:26px !important; }
+.dashboard h2,.history-card h2,.loan-card-new h2,.bank-admin-page h2 { font-size:20px !important; font-weight:600; color:#163646; margin:0 0 20px; }
+.dashboard .profile-card p { font-size:14px; line-height:1.7; }
+.dashboard h3 { font-size:15px; }
+.progress-container,.approval-bar { height:8px !important; border-radius:2px !important; }
+.progress-bar,.approval-bar > div { background:#175668 !important; border-radius:2px !important; }
+.history-card { border:1px solid #dce3e7; border-radius:5px !important; box-shadow:none !important; padding:24px !important; margin:24px 0 !important; background:white; }
+:is(.recent-table,.history-table,.bank-admin-page table) { width:100%; border-collapse:collapse; font-size:13px; }
+:is(.recent-table,.history-table,.bank-admin-page table) thead { background:#edf2f4 !important; color:#425b68 !important; }
+:is(.recent-table,.history-table,.bank-admin-page table) th { padding:16px !important; font-size:11px !important; font-weight:600; text-transform:uppercase; letter-spacing:.5px; background:#edf2f4 !important; color:#425b68 !important; border-bottom:1px solid #dce3e7; text-align:left !important; }
+:is(.recent-table,.history-table,.bank-admin-page table) td { padding:16px !important; font-size:13px !important; border-bottom:1px solid #e6ebee; text-align:left !important; color:#263d49; background:white; }
+:is(.recent-table,.history-table) tbody tr:hover td { background:#f7f9fa; }
+:is(.dashboard,.history-page,.loan-page,.bank-admin-page,.bank-upload-page) button { border-radius:4px !important; font-size:13px !important; box-shadow:none !important; }
+:is(.dashboard-buttons button,.predict-btn,.emi-btn,.back-dashboard-btn) { background:#175668 !important; padding:13px 20px !important; border:0; color:white; }
+.history-btn,.back-dashboard-btn { background:#fff !important; color:#175668 !important; border:1px solid #c4d1d7 !important; }
+.dashboard > div:first-of-type button { background:#175668 !important; }
+:is(.recent-status-approved,.badge-approved) { background:#e8f3ed !important; color:#276344 !important; border-radius:3px !important; font-size:12px !important; padding:6px 9px !important; }
+:is(.recent-status-rejected,.badge-rejected) { background:#f6eee8 !important; color:#876041 !important; border-radius:3px !important; font-size:12px !important; padding:6px 9px !important; }
+.loan-page { padding:0 0 40px !important; }
+.loan-card-new { width:calc(100% - 48px) !important; max-width:1152px !important; margin:32px auto !important; background:white; border:1px solid #dce3e7; border-radius:5px !important; box-shadow:none !important; padding:36px !important; }
+.loan-form h2 { padding-top:24px; border-top:1px solid #e3e9ec; margin-top:28px; font-size:17px !important; }
+.loan-form .input-grid { gap:18px; }
+:is(.loan-page,.history-page,.bank-admin-page,.bank-upload-page) :is(input,select,textarea) { border:1px solid #c7d2d9 !important; border-radius:4px !important; padding:13px 14px !important; background:white; color:#263d49; font-size:14px !important; min-height:46px; }
+:is(.loan-page,.history-page,.bank-admin-page,.bank-upload-page) :is(input,select,textarea):focus { outline:2px solid #b6d3db; outline-offset:1px; }
+.loan-page .emi-card,.loan-page .decision-receipt,.loan-page .ai-result { background:#f7f9fa !important; border:1px solid #d5e0e5 !important; border-radius:5px !important; padding:24px !important; }
+.loan-page .decision-receipt { margin-top:28px; }
+.loan-page .emi-result { color:#175668; font-size:22px; }
+.loan-page .input-grid label { display:flex; flex-direction:column; gap:8px; font-size:12px; font-weight:600; color:#526b78; }
+.bank-admin-page { padding:0 24px 40px !important; }
+.bank-admin-page > .main-navbar { margin:0 -24px 28px !important; }
+.bank-admin-page > div:not(.main-navbar) { max-width:1152px; margin-left:auto !important; margin-right:auto !important; border-radius:5px !important; box-shadow:none !important; }
+.bank-admin-page .bank-admin-heading { background:white !important; color:#163646 !important; border:1px solid #dce3e7; border-left:4px solid #bda46b; padding:28px !important; }
+.bank-admin-heading h1 { font-size:28px !important; font-weight:600; }
+.bank-admin-heading p { color:#697e89; font-size:14px !important; line-height:1.7; }
+.bank-admin-page > div:not(.main-navbar) > div { border-radius:5px !important; box-shadow:none !important; }
+.bank-admin-page > div:not(.main-navbar):not(.bank-admin-heading) { margin-bottom:24px !important; }
+.bank-admin-page h3 { font-size:14px; font-weight:600; }
+.bank-admin-page h4 { font-size:12px; }
+.bank-admin-page table { min-width:700px; }
+.bank-admin-page .bank-admin-table { overflow-x:auto !important; border:1px solid #dce3e7; }
+.bank-admin-page button { background:#175668 !important; color:white; }
+.bank-admin-page a { color:#175668; }
+.bank-admin-page .bank-admin-stats > div { border:1px solid #dce3e7; border-top:3px solid #bda46b; padding:24px !important; text-align:left !important; }
+.bank-admin-stats h1 { font-size:32px !important; margin:12px 0 0; color:#163646; }
+.bank-upload-page { padding:0 24px 40px; }
+.bank-upload-page > .main-navbar { margin:0 -24px 28px !important; }
+.bank-upload-page > div { max-width:900px; margin:32px auto; padding:32px; background:white; border:1px solid #dce3e7; border-radius:5px; }
+.bank-upload-page h1 { font-size:28px; color:#163646; }
+.bank-upload-page form { display:grid; gap:20px; }
+.bank-upload-page label { display:block; margin-bottom:8px; font-size:13px; }
+.bank-upload-page input { width:100%; }
+.bank-upload-page button { background:#175668; color:white; padding:14px; border:0; }
+@media(max-width:800px) {
+  .main-navbar { flex-direction:column; align-items:flex-start; padding:18px 20px !important; gap:14px; }
+  .main-navbar .nav-links { gap:2px; }
+  .main-navbar .nav-links a,.main-navbar .nav-links button { padding:9px; font-size:12px !important; }
+  .dashboard .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .dashboard h1,.history-container h1,.loan-card-new h1 { font-size:25px !important; }
+  .loan-card-new { padding:22px !important; width:calc(100% - 32px) !important; }
+  .loan-form .input-grid,.emi-grid { grid-template-columns:1fr !important; }
+  .bank-admin-page { padding:0 16px 24px !important; }
+  .bank-admin-page > .main-navbar { margin:0 -16px 24px !important; }
+}
+.dark-mode :is(.dashboard,.history-page,.loan-page,.bank-admin-page,.bank-upload-page) { background:#152630 !important; color:#d4e0e6; }
+.dark-mode :is(.profile-card,.recent-loans-card,.history-card,.stat-card,.loan-card-new) { background:#203744 !important; border-color:#39515d !important; }
+.dark-mode :is(.dashboard,.history-page,.loan-page) :is(h1,h2,h3,p,label) { color:#d4e0e6; }
+.dark-mode :is(.loan-page,.history-page) :is(input,select,textarea),.dark-mode .loan-page :is(.emi-card,.decision-receipt,.ai-result) { background:#203744 !important; color:#d4e0e6 !important; border-color:#39515d !important; }
+.dark-mode :is(.recent-table,.history-table) td { background:#203744 !important; color:#d4e0e6 !important; }
+.dark-mode :is(.recent-table,.history-table) th { background:#294652 !important; color:#d4e0e6 !important; }
+@media print { .main-navbar { display:none !important; } }

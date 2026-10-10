@@ -12,6 +12,7 @@ import UploadDocuments from "./pages/UploadDocuments";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminApplication from "./pages/AdminApplication";
+import "./Banking.css";
 
 function App() {
     return (

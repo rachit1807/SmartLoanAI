@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
+import AdminNav from "../components/AdminNav";
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -95,15 +96,18 @@ function AdminDashboard() {
 
   return (
     <div
+  className="bank-admin-page"
   style={{
     minHeight: "100vh",
     background: "#f4f7fb",
     padding: "35px",
   }}
 >
+  <AdminNav />
   {/* Header */}
 
   <div
+    className="bank-admin-heading"
     style={{
       background: "linear-gradient(135deg,#1e3c72,#2a5298)",
       color: "#fff",
@@ -119,7 +123,7 @@ function AdminDashboard() {
         fontSize: "36px",
       }}
     >
-      🏦 SmartLoan AI
+      Lending operations
     </h1>
 
     <h2
@@ -145,6 +149,7 @@ function AdminDashboard() {
   {/* Statistics */}
 
   <div
+    className="bank-admin-stats"
     style={{
       display: "grid",
       gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
@@ -202,6 +207,7 @@ function AdminDashboard() {
   {/* Table */}
 
   <div
+    className="bank-admin-table"
     style={{
       background: "#fff",
       borderRadius: "20px",

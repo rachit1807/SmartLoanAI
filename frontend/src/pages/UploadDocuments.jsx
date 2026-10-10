@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
+import Navbar from "../components/Navbar";
 
 function UploadDocuments() {
     const navigate = useNavigate();
@@ -64,7 +65,8 @@ function UploadDocuments() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex justify-center items-center p-6">
+        <div className="bank-upload-page">
+            <Navbar />
             <div className="bg-white shadow-lg rounded-xl p-8 w-full max-w-2xl">
 
                 <h1 className="text-3xl font-bold mb-2">
