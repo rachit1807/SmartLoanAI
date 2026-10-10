@@ -29,6 +29,8 @@
 :is(.dashboard,.history-page,.loan-page,.bank-admin-page,.bank-upload-page) button { border-radius:4px !important; font-size:13px !important; box-shadow:none !important; }
 :is(.dashboard-buttons button,.predict-btn,.emi-btn,.back-dashboard-btn) { background:#175668 !important; padding:13px 20px !important; border:0; color:white; }
 .history-btn,.back-dashboard-btn { background:#fff !important; color:#175668 !important; border:1px solid #c4d1d7 !important; }
+.dashboard-buttons button.history-btn { background:#fff !important; color:#175668 !important; border:1px solid #c4d1d7 !important; }
+.dashboard-buttons button.history-btn:hover { background:#edf2f4 !important; }
 .dashboard > div:first-of-type button { background:#175668 !important; }
 :is(.recent-status-approved,.badge-approved) { background:#e8f3ed !important; color:#276344 !important; border-radius:3px !important; font-size:12px !important; padding:6px 9px !important; }
 :is(.recent-status-rejected,.badge-rejected) { background:#f6eee8 !important; color:#876041 !important; border-radius:3px !important; font-size:12px !important; padding:6px 9px !important; }

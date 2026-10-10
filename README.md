@@ -74,6 +74,21 @@ Administrators can review every application, verify uploaded documents, analyze 
 
 # ✨ Features
 
+## Banking-style portal interface
+
+The applicant and operations portals use a consistent navy, teal and white design with compact cards, clear navigation, labelled application fields and readable tables. The layout adapts to desktop and mobile screens.
+
+- Login and registration with labelled fields, inline errors and loading states.
+- Applicant overview, loan application, history and document screens with shared navigation.
+- Admin application queue and individual review screens using the same visual style.
+- Loan History is available from both the dashboard action buttons and the Applications navigation link.
+
+## Affordability preview and document checks
+
+Applicants can preview affordability and repayment estimates before submitting an application. The preview includes a printable AI decision receipt with assessment factors, suggestions and model limitations. Previewing does not save an application.
+
+Administrators can run advisory name and income consistency checks on text-based sample PDFs. These checks support manual review; scanned images may require manual checking. A reviewer retains the final approval or rejection decision.
+
 ## 👤 User Module
 
 - 🔐 Secure User Registration & Login
