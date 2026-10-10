@@ -34,7 +34,7 @@
 .dashboard > div:first-of-type button { background:#175668 !important; }
 :is(.recent-status-approved,.badge-approved) { background:#e8f3ed !important; color:#276344 !important; border-radius:3px !important; font-size:12px !important; padding:6px 9px !important; }
 :is(.recent-status-rejected,.badge-rejected) { background:#f6eee8 !important; color:#876041 !important; border-radius:3px !important; font-size:12px !important; padding:6px 9px !important; }
-.loan-page { padding:0 0 40px !important; }
+.loan-page { display:block !important; padding:0 0 40px !important; }
 .loan-card-new { width:calc(100% - 48px) !important; max-width:1152px !important; margin:32px auto !important; background:white; border:1px solid #dce3e7; border-radius:5px !important; box-shadow:none !important; padding:36px !important; }
 .loan-form h2 { padding-top:24px; border-top:1px solid #e3e9ec; margin-top:28px; font-size:17px !important; }
 .loan-form .input-grid { gap:18px; }
@@ -44,6 +44,14 @@
 .loan-page .decision-receipt { margin-top:28px; }
 .loan-page .emi-result { color:#175668; font-size:22px; }
 .loan-page .input-grid label { display:flex; flex-direction:column; gap:8px; font-size:12px; font-weight:600; color:#526b78; }
+.loan-page .input-grid :is(input,select) { width:100%; height:48px; min-height:48px; box-sizing:border-box; }
+.loan-page button.back-dashboard-btn,.history-page button.back-dashboard-btn { background:#fff !important; color:#175668 !important; border:1px solid #c4d1d7 !important; margin-left:0; }
+.loan-page button.back-dashboard-btn:hover,.history-page button.back-dashboard-btn:hover { background:#edf2f4 !important; transform:none; }
+.loan-page .emi-btn,.loan-page .predict-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; color:#fff !important; }
+.loan-page .emi-btn { margin-top:20px; }
+.loan-page .predict-btn { margin-top:20px; }
+.main-navbar { width:100%; height:auto; min-height:76px; flex-shrink:0; }
+.loan-page .main-navbar { align-self:auto; }
 .bank-admin-page { padding:0 24px 40px !important; }
 .bank-admin-page > .main-navbar { margin:0 -24px 28px !important; }
 .bank-admin-page > div:not(.main-navbar) { max-width:1152px; margin-left:auto !important; margin-right:auto !important; border-radius:5px !important; box-shadow:none !important; }
@@ -85,4 +93,6 @@
 .dark-mode :is(.loan-page,.history-page) :is(input,select,textarea),.dark-mode .loan-page :is(.emi-card,.decision-receipt,.ai-result) { background:#203744 !important; color:#d4e0e6 !important; border-color:#39515d !important; }
 .dark-mode :is(.recent-table,.history-table) td { background:#203744 !important; color:#d4e0e6 !important; }
 .dark-mode :is(.recent-table,.history-table) th { background:#294652 !important; color:#d4e0e6 !important; }
+.dark-mode .loan-page :is(.decision-receipt,.ai-result) [style*="background"] { background:#294652 !important; color:#e3edf2 !important; }
+.dark-mode .loan-page :is(.decision-receipt,.ai-result) :is(p,strong,h2,h3,li) { color:#e3edf2 !important; }
 @media print { .main-navbar { display:none !important; } }

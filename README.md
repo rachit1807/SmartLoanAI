@@ -78,6 +78,8 @@ Administrators can review every application, verify uploaded documents, analyze 
 
 The applicant and operations portals use a consistent navy, teal and white design with compact cards, clear navigation, labelled application fields and readable tables. The layout adapts to desktop and mobile screens.
 
+Shared styles explicitly set navigation flow, input/select sizing and primary/secondary button contrast so the application form keeps its navigation above the content and action labels remain readable.
+
 - Login and registration with labelled fields, inline errors and loading states.
 - Applicant overview, loan application, history and document screens with shared navigation.
 - Admin application queue and individual review screens using the same visual style.
