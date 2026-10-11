@@ -5,13 +5,13 @@
 ![React](https://img.shields.io/badge/React-19-blue?logo=react)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi)
 ![Python](https://img.shields.io/badge/Python-3.11-yellow?logo=python)
-![SQLite](https://img.shields.io/badge/Database-SQLite-003B57?logo=sqlite)
+![PostgreSQL](https://img.shields.io/badge/Live_Database-Neon_PostgreSQL-4169E1?logo=postgresql)
 ![Machine Learning](https://img.shields.io/badge/AI-Machine%20Learning-success)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ### AI Powered Loan Approval & Financial Risk Assessment Platform
 
-A modern **Full Stack AI-powered Loan Approval System** built using **React**, **FastAPI**, **SQLite**, and **Machine Learning**.
+A modern **Full Stack AI-powered Loan Approval System** built using **React**, **FastAPI**, **Neon PostgreSQL** for the live database, **SQLite** for local development, and **Machine Learning**.
 
 The system allows users to apply for loans online while providing administrators with an intelligent dashboard to review applications, verify uploaded documents, analyze AI predictions, and approve or reject loan requests.
 
@@ -147,7 +147,7 @@ The Machine Learning engine analyzes multiple financial parameters to generate:
 |-----------|--------------|
 | Frontend | React.js, Vite, Axios, React Router |
 | Backend | FastAPI, Python |
-| Database | SQLite, SQLAlchemy |
+| Database | Neon PostgreSQL (live), SQLite (local), SQLAlchemy |
 | Machine Learning | Scikit-learn, Pandas, Joblib |
 | Authentication | JWT Authentication |
 | File Upload | FastAPI UploadFile |
@@ -166,7 +166,7 @@ The Machine Learning engine analyzes multiple financial parameters to generate:
 - ✅ Document Verification
 - ✅ Responsive User Interface
 - ✅ REST API Architecture
-- ✅ SQLite Database
+- ✅ PostgreSQL-backed live storage with SQLite local fallback
 - ✅ Machine Learning Integration
 - ✅ Role-Based Workflow (User & Admin)
 
@@ -211,7 +211,7 @@ The Machine Learning engine analyzes multiple financial parameters to generate:
         │                      │                      │
         ▼                      ▼                      ▼
 ┌────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ Machine Learning│    │ SQLite Database │    │ Uploaded Files  │
+│ Machine Learning│    │ SQL Database    │    │ Uploaded Files  │
 │ Loan Prediction │    │ SQLAlchemy ORM  │    │ Documents/PDFs  │
 └────────────────┘    └─────────────────┘    └─────────────────┘
 ```
@@ -242,7 +242,8 @@ The Machine Learning engine analyzes multiple financial parameters to generate:
         EMI Calculation Engine
                   │
                   ▼
-     Store Data into SQLite Database
+     Store Data in PostgreSQL (live)
+        or SQLite (local development)
                   │
                   ▼
         Admin Dashboard Review
@@ -493,8 +494,8 @@ http://localhost:5173
 
 | Method | Endpoint | Description |
 |---------|----------|-------------|
-| POST | `/register` | Register new user |
-| POST | `/login` | User Login |
+| POST | `/users/register` | Register new user |
+| POST | `/users/login` | User Login |
 
 ---
 
@@ -502,9 +503,10 @@ http://localhost:5173
 
 | Method | Endpoint | Description |
 |---------|----------|-------------|
-| POST | `/loan/apply` | Submit Loan Application |
-| GET | `/loan/history/{user_id}` | View Loan History |
-| GET | `/loan/{id}` | View Loan Details |
+| POST | `/loans/apply` | Submit Loan Application |
+| GET | `/loans/history/{user_id}` | View Loan History |
+| GET | `/loans/dashboard/{user_id}` | Applicant dashboard statistics |
+| GET | `/loans/recent/{user_id}` | Recent applications |
 
 ---
 
@@ -513,7 +515,8 @@ http://localhost:5173
 | Method | Endpoint | Description |
 |---------|----------|-------------|
 | POST | `/documents/upload` | Upload Documents |
-| GET | `/documents/{application_id}` | View Uploaded Documents |
+| GET | `/documents/user/{user_id}` | View user's uploaded document records |
+| PATCH | `/documents/{document_id}/status` | Review one document without changing other files or loan decisions |
 
 ---
 
@@ -523,7 +526,7 @@ http://localhost:5173
 |---------|----------|-------------|
 | GET | `/admin/applications` | Get All Applications |
 | GET | `/admin/application/{id}` | View Single Application |
-| POST | `/admin/verify/{id}` | Verify Documents |
+| POST | `/admin/verify/{id}` | Refresh AI assessment; not document authentication |
 | POST | `/admin/approve/{id}` | Approve Loan |
 | POST | `/admin/reject/{id}` | Reject Loan |
 
@@ -603,15 +606,38 @@ Loan Application
 
 # 🚀 Deployment
 
-This project can be deployed using the following platforms:
+The current live deployment uses:
 
 | Service | Purpose |
 |----------|---------|
 | Vercel | React Frontend |
 | Render | FastAPI Backend |
-| Railway | Full Stack Deployment |
-| Docker | Containerized Deployment |
+| Neon | Dedicated PostgreSQL database for SmartLoanAI accounts and application records |
 | GitHub | Source Code Management |
+
+## Persistent database configuration
+
+Set `DATABASE_URL` only in the **smartloanai-api** Render service's Environment settings, using the private connection string from the dedicated SmartLoanAI Neon project. Do not put credentials in source code, screenshots, or this README. Other projects' databases and environment variables must remain unchanged.
+
+The backend reads this variable through SQLAlchemy. PostgreSQL drivers (`psycopg` and `psycopg2-binary`) are included in `backend/requirements.txt`, and connection health checks handle stale pooled connections. Keep Neon SSL settings in the connection string. If `DATABASE_URL` is absent, the backend falls back to `sqlite:///./smartloan.db` for local development; that local file is not suitable for persistent storage on a free Render service.
+
+The live database stores accounts, loan applications, document metadata and review statuses independently of the Render application's local filesystem. Switching databases does not automatically recover or migrate accounts from an old SQLite database. Validate registration/login and record persistence after a restart; do not assume an erased account was restored.
+
+**Uploaded file limitation:** PDF/image contents still use the backend's local `uploads` directory. Neon preserves their database records, not the actual files. Files can disappear after Render restarts or redeployments until separate persistent file storage is implemented. Use demo documents only.
+
+## Separate document and loan review
+
+- **Check document consistency:** advisory name/income text checks, not authenticity or fraud verification.
+- **Approve document / Reject document:** changes only the selected document's status.
+- **Approve Loan / Reject Loan:** changes only the selected application, preserving document statuses.
+- **Refresh AI assessment:** reruns the prediction from application details. Currently it also writes the application's `status`, so it can overwrite a prior loan decision; separating this prediction field from the final decision remains a known limitation.
+
+Regression coverage for decision isolation uses a temporary in-memory database:
+
+```bash
+cd backend
+python test_decision_isolation.py
+```
 
 ---
 
@@ -747,7 +773,7 @@ The Admin Review page can run an advisory comparison for text-based PDFs. It che
 
 ### Setup and limitations
 
-Install backend dependencies with `pip install -r backend/requirements.txt`; `PyPDF2` enables PDF text extraction. The detector cannot OCR scanned PDFs, PNGs, or JPGs. The free deployment uses temporary SQLite/file storage, so data/uploads may not persist across redeployments. Admin endpoints remain a college-demo workflow and need authentication/role checks before real use.
+Install backend dependencies with `pip install -r backend/requirements.txt`; `PyPDF2` enables PDF text extraction. The detector cannot OCR scanned PDFs, PNGs, or JPGs. The live database uses Neon PostgreSQL through Render's `DATABASE_URL`; SQLite remains the local-development fallback. Uploaded file contents are still temporary on Render, even though their metadata is stored in PostgreSQL. Admin endpoints remain a college-demo workflow and need authentication/role checks before real use.
 
 ---
 
