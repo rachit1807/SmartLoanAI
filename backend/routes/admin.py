@@ -237,16 +237,6 @@ def approve_application(
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
 
-    documents = (
-        db.query(LoanDocument)
-        .filter(LoanDocument.application_id == application_id)
-        .all()
-    )
-
-    for document in documents:
-        document.verification_status = "Approved"
-        document.reviewed_at = datetime.utcnow()
-
     application.status = "Approved"
     application.review_status = "Approved"
 
@@ -267,12 +257,8 @@ def reject_application(
 
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
-    documents = db.query(LoanDocument).all()
-    print("DOCUMENTS FOUND:", len(documents))
-
-    for document in documents:
-     document.verification_status = "Rejected"
     application.status = "Rejected"
+    application.review_status = "Rejected"
     db.commit()
 
     return {"message": "Loan Rejected"}

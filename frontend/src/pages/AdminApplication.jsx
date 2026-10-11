@@ -11,6 +11,21 @@ function AdminApplication() {
   const [consistency, setConsistency] = useState(null);
   const [consistencyLoading, setConsistencyLoading] = useState(false);
   const [consistencyError, setConsistencyError] = useState("");
+  const [documentSaving, setDocumentSaving] = useState(false);
+  const [documentError, setDocumentError] = useState("");
+
+  const reviewDocument = async (documentId, status) => {
+    setDocumentSaving(true);
+    setDocumentError("");
+    try {
+      await API.patch(`/documents/${documentId}/status`, { verification_status: status });
+      await fetchApplication();
+    } catch (error) {
+      setDocumentError(typeof error.response?.data?.detail === "string" ? error.response.data.detail : "Could not save the document decision. Please try again.");
+    } finally {
+      setDocumentSaving(false);
+    }
+  };
 
   useEffect(() => {
     fetchApplication();
@@ -276,6 +291,8 @@ function AdminApplication() {
         }}
       >
         <h2>Uploaded documents</h2>
+        <p>Review each file separately. Loan decisions do not change document statuses.</p>
+        {documentError && <p role="alert">{documentError}</p>}
 
         <button
           type="button"
@@ -318,6 +335,10 @@ function AdminApplication() {
   <b>Status:</b>{" "}
   {doc.verification_status || "Pending"}
 </p>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 16 }}>
+                <button type="button" disabled={documentSaving} onClick={() => reviewDocument(doc.id, "Approved")} style={{ padding: "12px 16px", color: "#fff", border: 0 }}>Approve document</button>
+                <button type="button" disabled={documentSaving} onClick={() => reviewDocument(doc.id, "Rejected")} style={{ padding: "12px 16px", color: "#fff", border: 0 }}>Reject document</button>
+              </div>
             </div>
           ))
         ) : (
@@ -338,7 +359,7 @@ function AdminApplication() {
           color="#f59e0b"
           onClick={verifyDocuments}
         >
-          📄 Verify Documents
+          Refresh AI assessment
         </ActionButton>
 
         <ActionButton
