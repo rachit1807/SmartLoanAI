@@ -4,9 +4,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./smartloan.db")
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 # SQLite needs this setting locally. A managed PostgreSQL database does not.
-engine_options = {"connect_args": {"check_same_thread": False}} if DATABASE_URL.startswith("sqlite") else {}
+engine_options = {"connect_args": {"check_same_thread": False}} if DATABASE_URL.startswith("sqlite") else {"pool_pre_ping": True, "pool_recycle": 300}
 engine = create_engine(DATABASE_URL, **engine_options)
 
 
