@@ -1,13 +1,21 @@
+import os
+import secrets
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from database import SessionLocal
 from models import User
 
 
-SECRET_KEY = "smartloan_secret_key"
+SECRET_KEY = os.getenv('JWT_SECRET_KEY')
+if not SECRET_KEY:
+    if os.getenv('RENDER') == 'true':
+        raise RuntimeError('Configure JWT_SECRET_KEY on Render before deployment.')
+    SECRET_KEY = secrets.token_urlsafe(48)
+if len(SECRET_KEY) < 32:
+    raise RuntimeError('JWT_SECRET_KEY must have at least 32 characters.')
 ALGORITHM = "HS256"
 
 
@@ -38,11 +46,11 @@ def get_current_user(
         payload = jwt.decode(
             token,
             SECRET_KEY,
-            algorithms=[ALGORITHM]
+            algorithms=[ALGORITHM], options={'require_exp': True, 'require_sub': True}
         )
 
 
-        user_id = payload.get("user_id")
+        user_id = int(payload['sub'])
 
 
         if user_id is None:
@@ -52,7 +60,7 @@ def get_current_user(
             )
 
 
-    except Exception:
+    except (JWTError, ValueError, TypeError, KeyError):
 
         raise HTTPException(
             status_code=401,
@@ -67,9 +75,28 @@ def get_current_user(
 
     if user is None:
         raise HTTPException(
-            status_code=404,
-            detail="User not found"
+            status_code=401,
+            detail="Session no longer valid. Please sign in again."
         )
 
 
     return user
+
+
+def admin_emails():
+    return {email.strip().lower() for email in os.getenv('ADMIN_EMAILS', '').split(',') if email.strip()}
+
+
+def is_admin(user):
+    return user.email.strip().lower() in admin_emails()
+
+
+def require_admin(user=Depends(get_current_user)):
+    if not is_admin(user):
+        raise HTTPException(403, 'Administrator access required.')
+    return user
+
+
+def require_owner(user, user_id):
+    if user.id != user_id:
+        raise HTTPException(403, 'You cannot access another applicant account.')

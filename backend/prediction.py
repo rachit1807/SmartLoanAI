@@ -3,9 +3,10 @@ import os
 
 import joblib
 import pandas as pd
+from ml.features import application_frame
 
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "ml", "loan_model.pkl")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "ml", "loan_pipeline.joblib")
 model = joblib.load(MODEL_PATH)
 
 
@@ -104,26 +105,11 @@ def calculate_emi(loan_amount, months, annual_rate=10.5):
 
 
 def predict_loan(data):
-    print("PREDICT LOAN FUNCTION CALLED")
     financial_score, financial_health, reasons, suggestions = calculate_financial_health(data)
     loan_amount_rupees = float(data["loan_amount"])
 
-    # The trained loan dataset uses LoanAmount in thousands; the UI accepts rupees.
-    input_data = {
-        "Gender": 1 if data["gender"] == "Male" else 0,
-        "Married": 1 if data["married"] == "Yes" else 0,
-        "Dependents": 0,
-        "Education": 0 if data["education"] == "Graduate" else 1,
-        "Self_Employed": 1 if data["employment_status"] == "Self Employed" else 0,
-        "ApplicantIncome": int(data["income"]),
-        "CoapplicantIncome": int(data["coapplicant_income"]),
-        "LoanAmount": loan_amount_rupees / 1000,
-        "Loan_Amount_Term": int(data["loan_term"]),
-        "Credit_History": 1 if data["credit_history"] == "Good" else 0,
-        "Property_Area": 2 if data["property_area"] == "Urban" else 1 if data["property_area"] == "Semiurban" else 0,
-    }
-
-    dataframe = pd.DataFrame([input_data])
+    # Identical raw categories and preprocessing to the training pipeline.
+    dataframe = application_frame(data)
     prediction = model.predict(dataframe)[0]
     probabilities = model.predict_proba(dataframe)[0]
     classes = list(model.classes_)
@@ -139,13 +125,6 @@ def predict_loan(data):
     monthly_emi, total_interest, total_payment = calculate_emi(
         loan_amount_rupees, int(data["loan_term"])
     )
-    print("="*60)
-    print("REASONS:", reasons)
-    print("SUGGESTIONS:", suggestions)
-    print("="*60)
-    print("===== PREDICTION OUTPUT =====")
-    print(reasons)
-    print(suggestions)
     return {
         "status": status,
         "approval_probability": approved_probability,
@@ -157,4 +136,5 @@ def predict_loan(data):
         "monthly_emi": monthly_emi,
         "total_interest": total_interest,
         "total_payment": total_payment,
+        "assessment_notice": "Synthetic-data model score, not a calibrated lending probability. Financial reasons are rule-based, not SHAP/LIME explanations.",
     }

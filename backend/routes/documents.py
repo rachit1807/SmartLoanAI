@@ -7,6 +7,9 @@ from sqlalchemy.orm import Session
 
 from database import SessionLocal
 from models import LoanApplication, LoanDocument
+from dependencies import get_current_user, require_admin, require_owner, is_admin
+from fastapi.responses import Response
+from storage import MAX_FILE_SIZE, detect_type, persist_document, read_document
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
@@ -43,7 +46,9 @@ async def upload_document(
     document_type: str = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
 ):
+    require_owner(current_user, user_id)
     application = db.query(LoanApplication).filter(
         LoanApplication.id == application_id,
         LoanApplication.user_id == user_id,
@@ -55,13 +60,12 @@ async def upload_document(
     if suffix not in ALLOWED_EXTENSIONS:
         raise HTTPException(status_code=400, detail="Upload a PDF, PNG, JPG, or JPEG file only.")
 
-    content = await file.read()
+    content = await file.read(MAX_FILE_SIZE + 1)
     if not content or len(content) > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="Document must be between 1 byte and 5 MB.")
 
-    UPLOAD_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    content_type = detect_type(content, suffix)
     stored_filename = f"{uuid4().hex}{suffix}"
-    (UPLOAD_DIRECTORY / stored_filename).write_bytes(content)
 
     document = LoanDocument(
         application_id=application_id,
@@ -71,24 +75,32 @@ async def upload_document(
         stored_filename=stored_filename,
         verification_status="Pending",
     )
-    application.review_status = "Under Review"
+    if application.review_status not in {'Approved', 'Rejected'}:
+        application.review_status = "Under Review"
     db.add(document)
-    db.commit()
+    try:
+        db.flush()
+        persist_document(db, document, content, content_type)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
     db.refresh(document)
     return {"message": "Document uploaded for review.", "document": document_response(document)}
 
 
 @router.get("/user/{user_id}")
-def user_documents(user_id: int, db: Session = Depends(get_db)):
+def user_documents(user_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    require_owner(current_user, user_id)
     documents = db.query(LoanDocument).filter(
         LoanDocument.user_id == user_id
     ).order_by(LoanDocument.uploaded_at.desc()).all()
     return [document_response(document) for document in documents]
 
 
-@router.patch("/{document_id}/status")
+@router.patch("/{document_id}/status", dependencies=[Depends(require_admin)])
 def update_document_status(document_id: int, payload: dict, db: Session = Depends(get_db)):
-    """Admin/loan-officer endpoint. Add authentication before production deployment."""
+    """Administrator-only update to one selected file."""
     status = payload.get("verification_status")
     if status not in {"Pending", "Approved", "Rejected"}:
         raise HTTPException(status_code=400, detail="Status must be Pending, Approved, or Rejected.")
@@ -105,7 +117,7 @@ def update_document_status(document_id: int, payload: dict, db: Session = Depend
     return document_response(document)
 
 
-@router.patch("/applications/{application_id}/review-status")
+@router.patch("/applications/{application_id}/review-status", dependencies=[Depends(require_admin)])
 def update_application_review_status(application_id: int, payload: dict, db: Session = Depends(get_db)):
     """Admin/loan-officer endpoint. Add role checks before production deployment."""
     status = payload.get("review_status")
@@ -117,7 +129,23 @@ def update_application_review_status(application_id: int, payload: dict, db: Ses
         raise HTTPException(status_code=404, detail="Loan application was not found.")
 
     application.review_status = status
+    application.status = status if status in {'Approved', 'Rejected'} else 'Pending Documents'
     application.review_note = payload.get("review_note")
     db.commit()
     db.refresh(application)
     return {"application_id": application.id, "review_status": application.review_status, "review_note": application.review_note}
+
+
+@router.get('/{document_id}/download')
+def download_document(document_id: int, db=Depends(get_db), current_user=Depends(get_current_user)):
+    document = db.get(LoanDocument, document_id)
+    if not document:
+        raise HTTPException(404, 'Document not found.')
+    if not is_admin(current_user):
+        require_owner(current_user, document.user_id)
+    content, content_type = read_document(db, document)
+    from urllib.parse import quote
+    filename = quote(Path(document.original_filename).name, safe='')
+    return Response(content, media_type=content_type, headers={
+        'Content-Disposition': f"attachment; filename*=UTF-8''{filename}",
+        'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'})

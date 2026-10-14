@@ -47,18 +47,24 @@ function UploadDocuments() {
         try {
             setLoading(true);
 
-            await API.post("/documents/upload", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+            const labels = { income_report: 'Income Proof', aadhaar: 'Identity Proof', pan: 'PAN', salary_slip: 'Salary Slip', bank_statement: 'Bank Statement', photo: 'Photo' };
+            const selected = Object.entries(files).filter(([, file]) => file);
+            if (!selected.length) throw new Error('Select at least one sample document.');
+            for (const [key, file] of selected) {
+                const payload = new FormData();
+                payload.append('application_id', applicationId);
+                payload.append('user_id', JSON.parse(localStorage.getItem('user')).user_id);
+                payload.append('document_type', labels[key]);
+                payload.append('file', file);
+                await API.post('/documents/upload', payload);
+            }
 
             alert("Documents uploaded successfully.");
 
             navigate("/dashboard");
         } catch (err) {
             console.error(err);
-            alert("Upload failed.");
+            alert(typeof err.response?.data?.detail === 'string' ? err.response.data.detail : err.message || 'Upload failed. Some earlier files may already have uploaded; check Documents before retrying.');
         } finally {
             setLoading(false);
         }

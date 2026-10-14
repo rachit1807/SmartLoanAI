@@ -1,9 +1,4 @@
-function AdminLogin() {
-  return (
-    <div style={{ padding: "40px" }}>
-      <h1>Admin Login</h1>
-    </div>
-  );
-}
+import Login from './Login';
+function AdminLogin() { return <Login admin />; }
 
 export default AdminLogin;

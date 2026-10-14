@@ -1,922 +1,164 @@
-# 🏦 SmartLoan AI
+# SmartLoan AI
 
-<div align="center">
+An educational loan decision-support prototype combining applicant tracking, repayment scenarios, machine-learning assessment, sample-document consistency checks and human review. It does not issue loans, authenticate identity documents, detect fraud or provide validated default-risk predictions.
 
-![React](https://img.shields.io/badge/React-19-blue?logo=react)
-![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi)
-![Python](https://img.shields.io/badge/Python-3.11-yellow?logo=python)
-![PostgreSQL](https://img.shields.io/badge/Live_Database-Neon_PostgreSQL-4169E1?logo=postgresql)
-![Machine Learning](https://img.shields.io/badge/AI-Machine%20Learning-success)
-![License](https://img.shields.io/badge/License-MIT-green)
+## Live links
 
-### AI Powered Loan Approval & Financial Risk Assessment Platform
+- [Applicant portal](https://smart-loan-ai-one.vercel.app/)
+- [Admin dashboard](https://smart-loan-ai-one.vercel.app/admin-dashboard)
+- [Admin sign in](https://smart-loan-ai-one.vercel.app/admin-login)
+- [Backend API](https://smartloanai-api.onrender.com)
+- [GitHub repository](https://github.com/rachit1807/SmartLoanAI)
 
-A modern **Full Stack AI-powered Loan Approval System** built using **React**, **FastAPI**, **Neon PostgreSQL** for the live database, **SQLite** for local development, and **Machine Learning**.
+URLs are unchanged. Administrator pages now require an authorised account; knowing the URL does not grant permission. Existing sessions issued by the old insecure signing key must sign in again. Existing account passwords are not reset by this upgrade.
 
-The system allows users to apply for loans online while providing administrators with an intelligent dashboard to review applications, verify uploaded documents, analyze AI predictions, and approve or reject loan requests.
+## Features
 
-### 🌐 Live Demo
+- Banking-style registration, sign-in, applicant dashboard, loan entry, history and document screens.
+- Responsive applicant and operations navigation with persistent light/dark preferences.
+- Non-persistent affordability preview, scenario adjustments, EMI, total interest and repayment estimates, and printable assessment receipt.
+- Applicant-owned applications and case-linked sample PDFs/images.
+- Separate file decisions, loan decisions and advisory assessment refresh. Refreshing AI assessment cannot overwrite an administrator's decision, and one file decision cannot change its siblings.
+- Backend bearer-token verification, applicant ownership checks and administrator-only review routes. Frontend route checks supplement, not replace, backend enforcement.
+- Authenticated sample-file download by its owner or an administrator.
+- New upload contents stored transactionally with metadata in SQL (Neon PostgreSQL live, SQLite locally), not the ephemeral Render filesystem.
+- A shared preprocessing/model pipeline plus reproducible baseline comparisons and saved metrics.
 
-- **SmartLoan AI Website:** [https://smart-loan-ai-one.vercel.app](https://smart-loan-ai-one.vercel.app)
-- **Admin Dashboard:** [https://smart-loan-ai-one.vercel.app/admin-dashboard](https://smart-loan-ai-one.vercel.app/admin-dashboard)
-- **Backend API:** [https://smartloanai-api.onrender.com](https://smartloanai-api.onrender.com)
+Only use fictional, conspicuously marked sample documents. Do not upload genuine Aadhaar, PAN, bank statements or confidential financial information to this public academic demo.
 
-> This is an educational demonstration project. Please use sample data and documents only.
+## Architecture
 
----
+React/Vite on Vercel -> FastAPI on Render -> SQLAlchemy and Neon PostgreSQL.
 
-### 👨‍💻 Developed By
+The backend loads `backend/ml/loan_pipeline.joblib`. Its preprocessing is the same object used during training. `loan_applications` stores case information; `loan_documents` stores file metadata; the additive `document_contents` table stores bounded file bytes, media type, checksum and size. The new table is created without dropping accounts, applications or document decisions. No database URL or paid plan is changed by this code.
 
-**Rachit Tripathi**
+## Security and administrator setup
 
-Bachelor of Technology (Information Technology)
+Set these environment variables on the API host, never in committed source:
 
-Babu Banarasi Das Northern India Institute of Technology
+| Setting | Purpose |
+|---|---|
+| `DATABASE_URL` | Existing persistent Neon SQLAlchemy URL, including required SSL parameters. Preserve its value. |
+| `JWT_SECRET_KEY` | Random secret with at least 32 characters. Render startup fails closed if absent. |
+| `ADMIN_EMAILS` | Comma-separated authorised existing-account emails. No default public administrator. |
+| `ALLOWED_ORIGINS` | Existing frontend origin and optional local development origins. |
 
-</div>
+Roles are evaluated on the server for each request, not trusted from JWT role claims or local storage. Tokens expire after eight hours. With no configured local secret, a temporary process-only key is used and local sessions expire on restart. Passwords remain hashed with the existing password scheme.
 
----
+The public registration route refuses reserved administrator emails to prevent someone claiming an unregistered privileged address. If the administrator already has an account, use that account's existing project password. Do not use or share an email-provider password.
 
-# 📚 Table of Contents
+An operator may issue a private, expiring first-account setup link: set a SHA-256 digest in `ADMIN_SETUP_TOKEN_SHA256` and a Unix expiry in `ADMIN_SETUP_EXPIRES`, then privately deliver `/admin-setup#setup=<random-token>`. Use a cryptographically random token with at least 32 bytes of entropy. Only the digest is stored on the server. The fragment is not sent in navigation/referrer requests and is removed from the address bar on load; the form sends the token in a request header. Creation still requires an email in `ADMIN_EMAILS`, a 12-character password and a nonexistent account. Existing accounts cannot be reset or replaced by this link. Expired links must be reissued by an operator. Never commit or publish a real setup token.
 
-- Overview
-- Features
-- Technology Stack
-- System Architecture
-- Application Workflow
-- Project Structure
-- Installation
-- API Endpoints
-- Database
-- AI Prediction Engine
-- Admin Dashboard
-- Screenshots
-- Future Enhancements
-- Author
-- License
+If the reserved administrator does not yet have an account, a trusted operator must run `python provision_admin.py` privately in the backend environment connected to the intended database. It prompts for a new project password without echoing it, refuses to change existing accounts and does not accept passwords as command-line arguments. Never put credentials in the README, screenshots or a chat.
 
----
+This is still not bank-grade security: email verification, password recovery, shared rate limiting, comprehensive audit events, malware scanning and an independent security review remain future work.
 
-# 📖 Overview
+## Document persistence and limits
 
-SmartLoan AI is an intelligent loan approval platform designed to automate the loan evaluation process using Machine Learning.
+New files persist in the configured database and survive API restarts/redeployments if the same persistent `DATABASE_URL` remains configured. An authenticated download endpoint serves them with attachment and no-store headers. Signature checks require PDF/PNG/JPEG content matching the extension; this is not antivirus scanning or authenticity verification.
 
-Instead of relying solely on manual verification, the system evaluates financial information, predicts loan approval probability, calculates financial health, estimates EMI, and assists administrators in making informed approval decisions.
+- Maximum file size: 5 MiB, read with a bounded upload operation.
+- Demo-wide database file capacity: 100 MiB; further uploads are rejected when full.
+- PostgreSQL quota checks use a transaction-level advisory lock. Metadata and bytes commit together; failure rolls back both.
+- This deliberately bounded approach uses the existing database rather than a paid Render disk. Provider storage quotas still apply. Private object storage is recommended for larger systems.
+- Existing metadata is retained. Legacy files still present under `backend/uploads` can be read. Run `python migrate_file_storage.py` on the original host **before redeployment** to copy available legacy files into SQL without changing review statuses. Files already erased from Render cannot be recovered by this upgrade and require a new sample upload.
 
-The platform consists of two major modules:
+Text-based PDF comparison checks whether a name and declared income appear in extracted text. It does not validate signatures, issuing authorities, document authenticity or labelled income periods. Scanned PDFs/images require manual review; OCR and LayoutLM are not implemented. A text match never automatically approves a document or a loan.
 
-- 👤 User Portal
-- 👨‍💼 Admin Portal
+## Model pipeline and actual evaluation
 
-Users can securely register, submit loan applications, upload required documents, and track their application history.
+The bundled `backend/ml/loan_data.csv` contains **700 synthetic rows** generated using credit-history/income rules. Approval labels are not observed repayment outcomes. The evaluation is educational, not a validated measure of real lending accuracy or fairness.
 
-Administrators can review every application, verify uploaded documents, analyze AI-generated financial reports, and approve or reject loans from a professional dashboard.
+Training uses a stratified 80/20 split (560 training / 140 test rows), seed 42, and five-fold stratified cross-validation on the training partition only. Imputation, one-hot encoding and scaling are fitted inside each training fold; the test partition is not used to fit preprocessing or select hyperparameters. All candidates use identical splits.
 
-# ✨ Features
+| Model | Test accuracy | Precision | Recall | F1 | ROC-AUC |
+|---|---:|---:|---:|---:|---:|
+| Majority baseline | 0.5429 | 0.0000 | 0.0000 | 0.0000 | 0.5000 |
+| Logistic Regression | 0.9929 | 0.9846 | 1.0000 | 0.9922 | 1.0000 |
+| Decision Tree | 0.9786 | 0.9692 | 0.9844 | 0.9767 | 0.9790 |
+| Random Forest | 0.9857 | 0.9697 | 1.0000 | 0.9846 | 0.9990 |
 
-## Banking-style portal interface
+Random Forest is retained for continuity, not because it wins this benchmark. Logistic Regression has higher F1 on this split. High scores are unsurprising for rule-generated labels and must not be presented as real-world approval/default performance.
 
-Document review is independent of loan decisions. Admins approve or reject each file using its own document ID; approving or rejecting a loan updates only that application and preserves all document review statuses.
+- [Readable evaluation](backend/ml/EVALUATION.md)
+- [Full metrics, confusion matrices, class support, CV variability, dataset checksum and limitations](backend/ml/evaluation.json)
+- Shared feature contract: `backend/ml/features.py`.
+- Pipeline artifact: `backend/ml/loan_pipeline.joblib`; load only trusted project artifacts.
 
-The admin dashboard and application review pages include a Light theme / Dark theme switch in the operations navigation. The preference is saved in the browser and shared with the applicant portal. Dark styles cover review cards, assessment values, search fields and application tables without changing loan decisions or document verification.
+Inputs use income in INR/month, requested principal in INR and term in months. Principal is converted once to the dataset's thousands-INR unit. Education and all other categories use the same learned encoding in training/inference, fixing the previous reversed education mapping. Dependents remains zero at inference because the current form does not collect it. The synthetic income/tenure distribution limits extrapolation, particularly for high-income scenarios.
 
-The applicant and operations portals use a consistent navy, teal and white design with compact cards, clear navigation, labelled application fields and readable tables. The layout adapts to desktop and mobile screens.
+The API's legacy `approval_probability` field is retained for response compatibility, but UI labels identify it as an **uncalibrated demo model score**. Financial-health reasons are hand-written rules, not SHAP/LIME explanations, causal claims or bank policy.
 
-Shared styles explicitly set navigation flow, input/select sizing and primary/secondary button contrast so the application form keeps its navigation above the content and action labels remain readable.
-
-- Login and registration with labelled fields, inline errors and loading states.
-- Applicant overview, loan application, history and document screens with shared navigation.
-- Admin application queue and individual review screens using the same visual style.
-- Loan History is available from both the dashboard action buttons and the Applications navigation link.
-
-## Affordability preview and document checks
-
-Applicants can preview affordability and repayment estimates before submitting an application. The preview includes a printable AI decision receipt with assessment factors, suggestions and model limitations. Previewing does not save an application.
-
-Administrators can run advisory name and income consistency checks on text-based sample PDFs. These checks support manual review; scanned images may require manual checking. A reviewer retains the final approval or rejection decision.
-
-## 👤 User Module
-
-- 🔐 Secure User Registration & Login
-- 📝 Apply for Loan Online
-- 📄 Upload Required Documents
-- 🤖 AI-Based Loan Approval Prediction
-- 📊 Approval Probability Analysis
-- ⚠️ Risk Level Detection
-- 💰 Financial Health Score
-- 📈 Monthly EMI Calculator
-- 💵 Total Interest Calculation
-- 💳 Total Repayment Estimation
-- 📚 View Loan History
-- 📋 Dashboard with Recent Applications
-
----
-
-## 👨‍💼 Admin Module
-
-- 📊 Professional Admin Dashboard
-- 📈 Application Statistics
-- 🔍 Search Loan Applications
-- 👀 Review Individual Applications
-- 📄 Verify Uploaded Documents
-- 🤖 View Complete AI Prediction Report
-- ✅ Approve Loan Applications
-- ❌ Reject Loan Applications
-- 📂 Manage All Loan Requests
-
----
-
-## 🤖 AI Prediction Engine
-
-The Machine Learning engine analyzes multiple financial parameters to generate:
-
-- Approval Probability
-- Loan Approval Prediction
-- Financial Risk Level
-- Financial Health Category
-- Financial Score
-- Monthly EMI
-- Total Interest
-- Total Repayment Amount
-
----
-
-# 🛠 Technology Stack
-
-| Category | Technologies |
-|-----------|--------------|
-| Frontend | React.js, Vite, Axios, React Router |
-| Backend | FastAPI, Python |
-| Database | Neon PostgreSQL (live), SQLite (local), SQLAlchemy |
-| Machine Learning | Scikit-learn, Pandas, Joblib |
-| Authentication | JWT Authentication |
-| File Upload | FastAPI UploadFile |
-| Charts | Recharts |
-| Icons | Lucide React |
-| Styling | CSS3 |
-
----
-
-# ⭐ Key Highlights
-
-- ✅ Full Stack Web Application
-- ✅ AI Powered Loan Prediction
-- ✅ Financial Health Analysis
-- ✅ Admin Dashboard
-- ✅ Document Verification
-- ✅ Responsive User Interface
-- ✅ REST API Architecture
-- ✅ PostgreSQL-backed live storage with SQLite local fallback
-- ✅ Machine Learning Integration
-- ✅ Role-Based Workflow (User & Admin)
-
----
-
-# 📊 Project Statistics
-
-| Feature | Status |
-|----------|--------|
-| User Authentication | ✅ Completed |
-| Loan Application | ✅ Completed |
-| AI Prediction | ✅ Completed |
-| EMI Calculation | ✅ Completed |
-| Financial Health Analysis | ✅ Completed |
-| Loan History | ✅ Completed |
-| Document Upload | ✅ Completed |
-| Admin Dashboard | ✅ Completed |
-| Document Verification | ✅ Completed |
-| Loan Approval Workflow | ✅ Completed |
-| Search Functionality | ✅ Completed |
-| Database Integration | ✅ Completed |
-# 🏗️ System Architecture
-
-```text
-                        ┌────────────────────┐
-                        │     React Frontend │
-                        │  (Vite + Axios)    │
-                        └─────────┬──────────┘
-                                  │
-                         REST API Requests
-                                  │
-                                  ▼
-                     ┌─────────────────────────┐
-                     │     FastAPI Backend     │
-                     │ Authentication          │
-                     │ Loan APIs              │
-                     │ Admin APIs             │
-                     │ Document Upload APIs   │
-                     └─────────┬──────────────┘
-                               │
-        ┌──────────────────────┼──────────────────────┐
-        │                      │                      │
-        ▼                      ▼                      ▼
-┌────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ Machine Learning│    │ SQL Database    │    │ Uploaded Files  │
-│ Loan Prediction │    │ SQLAlchemy ORM  │    │ Documents/PDFs  │
-└────────────────┘    └─────────────────┘    └─────────────────┘
-```
-
----
-
-# 🔄 Application Workflow
-
-```text
-        User Registration/Login
-                  │
-                  ▼
-        Fill Loan Application
-                  │
-                  ▼
-        Upload Required Documents
-                  │
-                  ▼
-        FastAPI Backend Validation
-                  │
-                  ▼
-      Machine Learning Prediction
-                  │
-                  ▼
-      Financial Health Analysis
-                  │
-                  ▼
-        EMI Calculation Engine
-                  │
-                  ▼
-     Store Data in PostgreSQL (live)
-        or SQLite (local development)
-                  │
-                  ▼
-        Admin Dashboard Review
-                  │
-                  ▼
-      Document Verification Process
-                  │
-                  ▼
-        Loan Approved / Rejected
-                  │
-                  ▼
-        User Can View Loan History
-```
-
----
-
-# 🤖 AI Prediction Workflow
-
-```text
-Applicant Details
-        │
-        ▼
-Income Analysis
-        │
-        ▼
-Credit History Evaluation
-        │
-        ▼
-Loan Amount Assessment
-        │
-        ▼
-Machine Learning Model
-        │
-        ▼
-───────────────────────────────────
-Approval Probability
-Risk Level
-Financial Score
-Financial Health
-Monthly EMI
-Total Interest
-Total Repayment
-───────────────────────────────────
-        │
-        ▼
-Displayed on User Dashboard
-&
-Admin Dashboard
-```
-
----
-
-# 📂 Project Structure
-
-```text
-SmartLoanAI
-│
-├── backend
-│   │
-│   ├── routes
-│   │      ├── users.py
-│   │      ├── loans.py
-│   │      ├── documents.py
-│   │      └── admin.py
-│   │
-│   ├── ml
-│   │      ├── loan_model.pkl
-│   │      ├── loan_data.csv
-│   │      └── train_model.py
-│   │
-│   ├── uploads
-│   │
-│   ├── database.py
-│   ├── models.py
-│   ├── prediction.py
-│   ├── main.py
-│   ├── migrate_db.py
-│   └── smartloan.db
-│
-├── frontend
-│   │
-│   ├── src
-│   │
-│   ├── api
-│   │      └── axios.js
-│   │
-│   ├── components
-│   │
-│   ├── pages
-│   │      ├── Login.jsx
-│   │      ├── Register.jsx
-│   │      ├── Dashboard.jsx
-│   │      ├── ApplyLoan.jsx
-│   │      ├── UploadDocuments.jsx
-│   │      ├── LoanHistory.jsx
-│   │      ├── AdminDashboard.jsx
-│   │      └── AdminApplication.jsx
-│   │
-│   ├── App.jsx
-│   └── main.jsx
-│
-├── README.md
-└── requirements.txt
-```
-
----
-
-# 🏦 Complete Loan Approval Lifecycle
-
-```text
-User
- │
- │ Register/Login
- ▼
-Loan Application
- │
- ▼
-Document Upload
- │
- ▼
-AI Prediction
- │
- ▼
-Financial Analysis
- │
- ▼
-Application Stored
- │
- ▼
-────────────────────────────────────
-        ADMIN PORTAL
-────────────────────────────────────
- │
- ▼
-Review Application
- │
- ▼
-Verify Documents
- │
- ▼
-Approve / Reject Loan
- │
- ▼
-Status Updated
- │
- ▼
-Visible in User Dashboard
-```
-# ⚙️ Installation Guide
-
-## 1️⃣ Clone the Repository
+Reproduce from the backend directory:
 
 ```bash
-git clone https://github.com/rachit1807/SmartLoanAI.git
+python -m ml.train_model
+python -m unittest test_security_workflow test_decision_isolation -v
 ```
 
-```bash
-cd SmartLoanAI
-```
+Training writes only model/evaluation artifacts and never reads the application database. Changing the saved model only affects future assessments or explicit reassessments; it does not rewrite historical reviewer decisions.
 
----
+## Local development
 
-## 2️⃣ Backend Setup
-
-Navigate to the backend directory.
+Use a supported Python runtime (Render is configured for Python 3.12) and a Node version supported by Vite. Create an isolated virtual environment and install `backend/requirements.txt`. The model's scikit-learn version is pinned for artifact compatibility.
 
 ```bash
 cd backend
-```
-
-### Create Virtual Environment
-
-**Windows**
-
-```bash
 python -m venv venv
-venv\Scripts\activate
-```
-
-**macOS / Linux**
-
-```bash
-python3 -m venv venv
 source venv/bin/activate
-```
-
----
-
-### Install Dependencies
-
-```bash
 pip install -r requirements.txt
-```
-
----
-
-### Start FastAPI Server
-
-```bash
 uvicorn main:app --reload
 ```
 
-Backend runs at:
+On Windows use `venv\Scripts\activate`. Without `DATABASE_URL`, local SQLite is used; it is not a persistent deployment database. Configure administrator variables separately if testing operations access.
 
-```
-http://127.0.0.1:8000
-```
-
-Swagger Documentation:
-
-```
-http://127.0.0.1:8000/docs
-```
-
----
-
-## 3️⃣ Frontend Setup
-
-Open another terminal.
+In another terminal:
 
 ```bash
 cd frontend
-```
-
-Install packages
-
-```bash
-npm install
-```
-
-Run React App
-
-```bash
+npm ci
 npm run dev
 ```
 
-Frontend runs at:
+Set frontend `VITE_API_BASE_URL` to the backend URL (default `http://127.0.0.1:8000`). Local frontend: `http://localhost:5173`. Build check: `npm run build`.
 
-```
-http://localhost:5173
-```
+## API access
 
----
+| Endpoints | Access |
+|---|---|
+| `POST /users/register`, `POST /users/login` | Public; reserved administrator registration is blocked |
+| `GET /users/me` | Authenticated account |
+| `POST /loans/simulate` | Public, non-persistent scenario; no stored user records |
+| `POST /loans/apply` | Authenticated applicant; submitted user ID must match identity |
+| `GET /loans/history/{user_id}`, `/dashboard/{user_id}`, `/recent/{user_id}` | Matching authenticated applicant |
+| `POST /documents/upload`, `GET /documents/user/{user_id}` | Matching authenticated applicant |
+| `GET /documents/{document_id}/download` | Owner or administrator |
+| `PATCH /documents/{document_id}/status` | Administrator only; one file |
+| `PATCH /documents/applications/{application_id}/review-status` | Administrator only; one case |
+| All `/admin/*` routes | Administrator only |
 
-# 🔌 REST API Endpoints
+`/admin/verify/{id}` refreshes advisory assessment fields only. `/admin/approve/{id}` and `/admin/reject/{id}` set the selected case decision without changing files. Both approved and rejected manual decisions survive reassessment.
 
-## Authentication
+## Verification and rollout
 
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/users/register` | Register new user |
-| POST | `/users/login` | User Login |
+The integration suite uses a disposable SQLite database, not production data. It covers denied anonymous/admin access, cross-user isolation, invalid/expired tokens, reserved admin registration, document decision isolation, opposite reassessment after manual approval/rejection, bounded and type-checked uploads, quota rollback, authorised download, file persistence after reopening a database, input validation and preview without saving.
 
----
+Local SQLite reopening is not a claim that a production Neon restart was tested. Perform a controlled live sign-in/upload/download check using sample data after deployment. Retain the same Vercel project, domain, Render service and Neon connection. Existing data is not reset or replaced. A deployment can have brief startup delay; zero downtime cannot be guaranteed.
 
-## Loan APIs
+## Research basis and next work
 
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/loans/apply` | Submit Loan Application |
-| GET | `/loans/history/{user_id}` | View Loan History |
-| GET | `/loans/dashboard/{user_id}` | Applicant dashboard statistics |
-| GET | `/loans/recent/{user_id}` | Recent applications |
+Literature motivates benchmarking, transparent assessment and future document understanding; the project does not reproduce all cited methods or borrow their experimental results.
 
----
+- Gawande et al. (2026), [explainable ensemble loan approval](https://doi.org/10.1007/s44163-026-01569-6).
+- Lessmann et al. (2015), [classification benchmarking for credit scoring](https://doi.org/10.1016/j.ejor.2015.05.030).
+- Bussmann et al. (2020), [Explainable AI in Fintech Risk Management](https://doi.org/10.3389/frai.2020.00026).
+- Demajo et al. (2020), [Explainable AI for Interpretable Credit Scoring](https://arxiv.org/abs/2012.03749).
+- Xu et al. (KDD 2020), [LayoutLM](https://arxiv.org/abs/1912.13318), a future direction only.
 
-## Document APIs
+Priorities: verified real-world evaluation data, calibration and subgroup analysis, verified email/recovery and shared rate limiting, complete review audit history, robust labelled income extraction, malware scanning, private object storage at scale, and optional SHAP/LIME or OCR after validation. No claims of regulatory certification or production banking readiness are made.
 
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/documents/upload` | Upload Documents |
-| GET | `/documents/user/{user_id}` | View user's uploaded document records |
-| PATCH | `/documents/{document_id}/status` | Review one document without changing other files or loan decisions |
+## Author
 
----
+Rachit Tripathi - B.Tech Information Technology, Babu Banarasi Das Northern India Institute of Technology.
 
-## Admin APIs
-
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/admin/applications` | Get All Applications |
-| GET | `/admin/application/{id}` | View Single Application |
-| POST | `/admin/verify/{id}` | Refresh AI assessment; not document authentication |
-| POST | `/admin/approve/{id}` | Approve Loan |
-| POST | `/admin/reject/{id}` | Reject Loan |
-
----
-
-# 🗄️ Database Schema
-
-## Users Table
-
-| Field | Type |
-|--------|------|
-| id | Integer |
-| name | String |
-| email | String |
-| password | String |
-
----
-
-## Loan Applications Table
-
-| Field | Type |
-|--------|------|
-| id | Integer |
-| user_id | Integer |
-| income | Float |
-| loan_amount | Float |
-| loan_term | Integer |
-| credit_history | String |
-| property_area | String |
-| approval_probability | Float |
-| risk_level | String |
-| financial_score | Float |
-| financial_health | String |
-| monthly_emi | Float |
-| total_interest | Float |
-| total_payment | Float |
-| status | String |
-
----
-
-## Loan Documents Table
-
-| Field | Type |
-|--------|------|
-| id | Integer |
-| application_id | Integer |
-| user_id | Integer |
-| document_type | String |
-| stored_filename | String |
-| verification_status | String |
-| uploaded_at | DateTime |
-
----
-
-# 🔐 Authentication Flow
-
-```text
-User
- │
- ▼
-Register
- │
- ▼
-Login
- │
- ▼
-Backend Authentication
- │
- ▼
-User Dashboard
- │
- ▼
-Loan Application
-```
-
----
-
-# 🚀 Deployment
-
-The current live deployment uses:
-
-| Service | Purpose |
-|----------|---------|
-| Vercel | React Frontend |
-| Render | FastAPI Backend |
-| Neon | Dedicated PostgreSQL database for SmartLoanAI accounts and application records |
-| GitHub | Source Code Management |
-
-## Persistent database configuration
-
-Set `DATABASE_URL` only in the **smartloanai-api** Render service's Environment settings, using the private connection string from the dedicated SmartLoanAI Neon project. Do not put credentials in source code, screenshots, or this README. Other projects' databases and environment variables must remain unchanged.
-
-The backend reads this variable through SQLAlchemy. PostgreSQL drivers (`psycopg` and `psycopg2-binary`) are included in `backend/requirements.txt`, and connection health checks handle stale pooled connections. Keep Neon SSL settings in the connection string. If `DATABASE_URL` is absent, the backend falls back to `sqlite:///./smartloan.db` for local development; that local file is not suitable for persistent storage on a free Render service.
-
-The live database stores accounts, loan applications, document metadata and review statuses independently of the Render application's local filesystem. Switching databases does not automatically recover or migrate accounts from an old SQLite database. Validate registration/login and record persistence after a restart; do not assume an erased account was restored.
-
-**Uploaded file limitation:** PDF/image contents still use the backend's local `uploads` directory. Neon preserves their database records, not the actual files. Files can disappear after Render restarts or redeployments until separate persistent file storage is implemented. Use demo documents only.
-
-## Separate document and loan review
-
-- **Check document consistency:** advisory name/income text checks, not authenticity or fraud verification.
-- **Approve document / Reject document:** changes only the selected document's status.
-- **Approve Loan / Reject Loan:** changes only the selected application, preserving document statuses.
-- **Refresh AI assessment:** reruns the prediction from application details. Currently it also writes the application's `status`, so it can overwrite a prior loan decision; separating this prediction field from the final decision remains a known limitation.
-
-Regression coverage for decision isolation uses a temporary in-memory database:
-
-```bash
-cd backend
-python test_decision_isolation.py
-```
-
----
-
-# 🧪 Testing Checklist
-
-- ✅ User Registration
-- ✅ User Login
-- ✅ Loan Application Submission
-- ✅ Document Upload
-- ✅ AI Prediction Generation
-- ✅ EMI Calculation
-- ✅ Loan History
-- ✅ Admin Dashboard
-- ✅ Application Review
-- ✅ Document Verification
-- ✅ Loan Approval
-- ✅ Loan Rejection
-- ✅ Database Storage
-- ✅ REST APIs
-# 🎯 Project Highlights
-
-SmartLoan AI is designed to streamline the loan approval process by combining Machine Learning with a modern full-stack web application.
-
-## Key Capabilities
-
-### 👤 User Portal
-
-- Secure User Registration & Login
-- Apply for Loan Online
-- Upload Required Documents
-- AI-Based Loan Prediction
-- Financial Health Analysis
-- EMI Calculation
-- Loan History Tracking
-
----
-
-### 👨‍💼 Admin Portal
-
-- Professional Admin Dashboard
-- Search Applications
-- Review Individual Applications
-- View Complete AI Prediction
-- Verify Uploaded Documents
-- Approve / Reject Loan Applications
-
----
-
-### 🤖 AI Decision Engine
-
-The Machine Learning model analyzes multiple financial parameters to assist loan officers in making informed decisions.
-
-The prediction engine generates:
-
-- Loan Approval Probability
-- Financial Score
-- Financial Health Category
-- Risk Level
-- Monthly EMI
-- Total Interest
-- Total Repayment Amount
-
----
-
-# 📊 Core Functionalities
-
-| Module | Status |
-|----------|:------:|
-| User Authentication | ✅ |
-| Loan Application | ✅ |
-| AI Prediction | ✅ |
-| Financial Health Analysis | ✅ |
-| EMI Calculator | ✅ |
-| Loan History | ✅ |
-| Document Upload | ✅ |
-| Admin Dashboard | ✅ |
-| Document Verification | ✅ |
-| Loan Approval Workflow | ✅ |
-| REST APIs | ✅ |
-| Database Integration | ✅ |
-
----
-
-# 🧠 AI Prediction Parameters
-
-The Machine Learning model evaluates the following parameters before generating a prediction:
-
-- Age
-- Gender
-- Marital Status
-- Education
-- Employment Status
-- Monthly Income
-- Co-applicant Income
-- Loan Amount
-- Loan Term
-- Credit History
-- Property Area
-
-Based on these inputs, the system predicts:
-
-- Loan Approval Status
-- Approval Probability
-- Risk Level
-- Financial Score
-- Financial Health
-- Monthly EMI
-- Total Interest
-- Total Repayment Amount
-
----
-
-# 🧾 Explainability, Recovery Simulation & Document Consistency
-
-## Loan Recovery & Affordability Simulator
-
-Before submitting, an applicant can adjust the requested amount and repayment term and generate a non-persistent preview. The preview calculates EMI, total interest, total repayment, and a model-based pre-screening recommendation. It never changes an application, guarantees approval, or replaces a bank review.
-
-## Explainable AI Decision Receipt
-
-The simulator generates a printable receipt with a timestamp, AI recommendation, approval likelihood, risk indicator, financial score, repayment figures, model-aligned factors, safer next steps, and limitations. Explanations come from the project's implemented financial-health rules and probability output; this project does **not** claim SHAP or LIME implementation.
-
-## Document Consistency Detector
-
-The Admin Review page can run an advisory comparison for text-based PDFs. It checks detectable applicant-name and declared-income values against application data and keeps the output limited to findings rather than exposing full document text. A discrepancy is not fraud detection and cannot automatically approve or reject a loan. Scanned/image files are marked for manual review.
-
-### New API endpoints
-
-| Method | Endpoint | Purpose |
-|---|---|---|
-| POST | `/loans/simulate` | Validated, non-persistent affordability and AI pre-screening preview |
-| GET | `/admin/application/{id}/document-consistency` | Advisory text-based PDF consistency results |
-
-### Setup and limitations
-
-Install backend dependencies with `pip install -r backend/requirements.txt`; `PyPDF2` enables PDF text extraction. The detector cannot OCR scanned PDFs, PNGs, or JPGs. The live database uses Neon PostgreSQL through Render's `DATABASE_URL`; SQLite remains the local-development fallback. Uploaded file contents are still temporary on Render, even though their metadata is stored in PostgreSQL. Admin endpoints remain a college-demo workflow and need authentication/role checks before real use.
-
----
-
-# 💼 Skills Demonstrated
-
-This project demonstrates practical knowledge of:
-
-- Full Stack Web Development
-- REST API Development
-- Machine Learning Integration
-- Database Design
-- Authentication
-- File Upload Handling
-- Financial Data Processing
-- AI Explainability
-- Dashboard Development
-- Role-Based Workflow
-- CRUD Operations
-- Professional UI Design
-
----
-
-# 🚀 Future Enhancements
-
-- Credit Score Integration
-- OCR-Based Document Verification
-- Cloud Deployment (AWS / Azure)
-- Docker Support
-- Role-Based Access Control (RBAC)
-- Email & SMS Notifications
-- Export Reports to PDF / Excel
-- Business Analytics Dashboard
-- Chatbot-Based Loan Assistance
-- Multi-Bank Integration
----
-
-# 🤝 Contributing
-
-Contributions are welcome!
-
-If you'd like to improve SmartLoan AI, feel free to:
-
-1. Fork the repository
-2. Create a new feature branch
-
-```bash
-git checkout -b feature/your-feature-name
-```
-
-3. Commit your changes
-
-```bash
-git commit -m "Add: your feature description"
-```
-
-4. Push the branch
-
-```bash
-git push origin feature/your-feature-name
-```
-
-5. Open a Pull Request
-
-Please ensure your code follows the existing project structure and coding style.
-
----
-
-# 📜 License
-
-This project is licensed under the **MIT License**.
-
-You are free to use, modify, and distribute this project for educational and personal purposes.
-
----
-
-# 🙏 Acknowledgements
-
-Special thanks to the following technologies and open-source communities:
-
-- React.js
-- FastAPI
-- Python
-- Scikit-learn
-- SQLAlchemy
-- SQLite
-- Pandas
-- Joblib
-- Vite
-- Axios
-
-Their excellent documentation and community support made this project possible.
-
----
-
-# 👨‍💻 Author
-
-## Rachit Tripathi
-
-**Bachelor of Technology (Information Technology)**
-
-Babu Banarasi Das Northern India Institute of Technology
-
-### Connect with me
-
-- **GitHub:** https://github.com/rachit1807
-- **LinkedIn:** https://linkedin.com/in/rachittripathi2509
-
----
-
-# ⭐ Support the Project
-
-If you found this project useful or interesting:
-
-⭐ Star this repository
-
-🍴 Fork the repository
-
-🛠️ Suggest improvements
-
-🐞 Report bugs
-
-Your support helps improve the project and motivates future development.
-
----
-
-# 📬 Contact
-
-For feedback, suggestions, or collaboration opportunities, feel free to connect through GitHub or LinkedIn.
-
-I'm always open to learning, collaborating, and building impactful software projects.
-
----
-
-<div align="center">
-
-## 🏦 SmartLoan AI
-
-### AI-Powered Loan Approval & Financial Risk Assessment Platform
-
-**Built with ❤️ using React • FastAPI • Python • Machine Learning**
-
----
-
-⭐ **If you like this project, don't forget to give it a Star!**
-
-</div>
+[GitHub](https://github.com/rachit1807) | [LinkedIn](https://linkedin.com/in/rachittripathi2509)

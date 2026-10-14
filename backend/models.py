@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Float, Integer, String, Text
+from sqlalchemy import Column, DateTime, Float, Integer, String, Text, LargeBinary, ForeignKey
 
 from database import Base
 
@@ -72,3 +72,13 @@ class LoanDocument(Base):
     review_note = Column(Text, nullable=True)
     uploaded_at = Column(DateTime, default=datetime.utcnow)
     reviewed_at = Column(DateTime, nullable=True)
+
+
+class DocumentContent(Base):
+    """Small demo uploads persist with metadata in the configured SQL database."""
+    __tablename__ = 'document_contents'
+    document_id = Column(Integer, ForeignKey('loan_documents.id'), primary_key=True)
+    content = Column(LargeBinary, nullable=False)
+    content_type = Column(String, nullable=False)
+    sha256 = Column(String(64), nullable=False)
+    size_bytes = Column(Integer, nullable=False)

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FileCheck2, FileUp, ShieldCheck } from "lucide-react";
 
 import Navbar from "../components/Navbar";
-import API from "../api/axios";
+import API, { downloadDocument } from "../api/axios";
 import "../App.css";
 
 function DocumentVerification() {
@@ -251,7 +251,7 @@ function DocumentVerification() {
 
                       <td>{document.document_type}</td>
 
-                      <td>{document.original_filename}</td>
+                      <td>{document.original_filename}<br /><button type="button" onClick={() => downloadDocument(document.id, document.original_filename).catch(() => alert('File unavailable. Please upload the sample again.'))}>Download</button></td>
 
                       <td>
                         <span

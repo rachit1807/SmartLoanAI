@@ -13,6 +13,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminApplication from "./pages/AdminApplication";
 import "./Banking.css";
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
     return (
@@ -22,29 +23,30 @@ function App() {
                 {/* Authentication */}
                 <Route path="/" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/admin-setup" element={<Register adminSetup />} />
 
                 {/* User */}
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/apply-loan" element={<ApplyLoan />} />
-                <Route path="/loan-history" element={<LoanHistory />} />
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/apply-loan" element={<ProtectedRoute><ApplyLoan /></ProtectedRoute>} />
+                <Route path="/loan-history" element={<ProtectedRoute><LoanHistory /></ProtectedRoute>} />
                 <Route
                     path="/document-verification"
-                    element={<DocumentVerification />}
+                    element={<ProtectedRoute><DocumentVerification /></ProtectedRoute>}
                 />
                 <Route
                     path="/upload-documents"
-                    element={<UploadDocuments />}
+                    element={<ProtectedRoute><UploadDocuments /></ProtectedRoute>}
                 />
 
                 {/* Admin */}
                 <Route path="/admin-login" element={<AdminLogin />} />
                 <Route
                     path="/admin-dashboard"
-                    element={<AdminDashboard />}
+                    element={<ProtectedRoute admin><AdminDashboard /></ProtectedRoute>}
                 />
                 <Route
                     path="/admin/application/:id"
-                    element={<AdminApplication />}
+                    element={<ProtectedRoute admin><AdminApplication /></ProtectedRoute>}
                 />
 
             </Routes>

@@ -2,6 +2,8 @@
 node_modules/
 
 # Python
+.venv/
+frontend/dist/
 backend/venv/
 backend/.venv/
 __pycache__/

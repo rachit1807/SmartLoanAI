@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import LoanApplication
 from prediction import predict_loan
+from dependencies import get_current_user, require_owner
+import math
 
 router = APIRouter(
     prefix="/loans",
@@ -27,11 +29,20 @@ def validate_simulation_input(data):
         co_income = float(data["coapplicant_income"])
         amount = float(data["loan_amount"])
         term = int(data["loan_term"])
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         raise HTTPException(status_code=422, detail="Age, income, loan amount, and term must be valid numbers.")
 
     if not 18 <= age <= 100:
         raise HTTPException(status_code=422, detail="Age must be between 18 and 100.")
+    if not all(math.isfinite(x) for x in (income, co_income, amount)):
+        raise HTTPException(422, 'Amounts must be finite numbers.')
+    allowed = {'gender': {'Male','Female'}, 'married': {'Yes','No'},
+               'education': {'Graduate','Not Graduate'},
+               'employment_status': {'Employed','Self Employed'},
+               'credit_history': {'Good','Bad','Poor'}, 'property_area': {'Urban','Semiurban','Rural'}}
+    for key, values in allowed.items():
+        if data[key] not in values:
+            raise HTTPException(422, f'Invalid {key}.')
     if income < 0 or co_income < 0 or not 1_000 <= amount <= 10_000_000 or not 6 <= term <= 480:
         raise HTTPException(status_code=422, detail="Use non-negative income, a loan amount from ₹1,000 to ₹1,00,00,000, and a term from 6 to 480 months.")
 
@@ -76,12 +87,15 @@ def get_db():
 @router.post("/apply")
 def apply_loan(
     loan_data: dict,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
+    require_owner(current_user, loan_data.get('user_id'))
+    validate_simulation_input(loan_data)
     try:
 
         new_application = LoanApplication(
-            user_id=loan_data["user_id"],
+            user_id=current_user.id,
             age=loan_data["age"],
             gender=loan_data["gender"],
             married=loan_data["married"],
@@ -123,8 +137,10 @@ def apply_loan(
 @router.get("/history/{user_id}")
 def loan_history(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
+    require_owner(current_user, user_id)
 
     applications = db.query(
         LoanApplication
@@ -142,8 +158,10 @@ def loan_history(
 @router.get("/dashboard/{user_id}")
 def dashboard_stats(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
+    require_owner(current_user, user_id)
 
     applications = db.query(
         LoanApplication
@@ -165,7 +183,7 @@ def dashboard_stats(
 
     pending = len([
         app for app in applications
-        if app.status == "Pending"
+        if app.status not in {"Approved", "Rejected"}
     ])
 
     if total_loans > 0:
@@ -201,8 +219,10 @@ def dashboard_stats(
 @router.get("/recent/{user_id}")
 def recent_loans(
     user_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
+    require_owner(current_user, user_id)
 
     applications = db.query(
         LoanApplication

@@ -12,10 +12,13 @@ except ImportError:  # Keep the loan API available if optional PDF extraction is
 from database import SessionLocal
 from models import LoanApplication, LoanDocument, User
 from prediction import predict_loan
+from dependencies import require_admin
+from storage import read_document
+from io import BytesIO
 
 router = APIRouter(
     prefix="/admin",
-    tags=["Admin"]
+    tags=["Admin"], dependencies=[Depends(require_admin)]
 )
 
 UPLOAD_DIRECTORY = Path(__file__).resolve().parent.parent / "uploads"
@@ -37,7 +40,7 @@ def _extract_pdf_text(path):
     if PdfReader is None:
         return ""
     try:
-        reader = PdfReader(str(path))
+        reader = PdfReader(path if hasattr(path, 'read') else str(path))
         return " ".join((page.extract_text() or "") for page in reader.pages)[:20_000]
     except Exception:
         return ""
@@ -63,7 +66,11 @@ def document_consistency(application_id: int, db: Session = Depends(get_db)):
             results.append(item)
             continue
 
-        text = _extract_pdf_text(UPLOAD_DIRECTORY / document.stored_filename)
+        try:
+            content, _ = read_document(db, document)
+            text = _extract_pdf_text(BytesIO(content))
+        except HTTPException:
+            text = ''
         if not text.strip():
             item["status"] = "Unreadable"
             if PdfReader is None:
@@ -147,7 +154,7 @@ def verify_application(
 
     prediction = predict_loan(loan_data)
 
-    application.status = prediction["status"]
+    # Advisory refresh must never overwrite the reviewer's case decision.
     application.approval_probability = prediction["approval_probability"]
     application.risk_level = prediction["risk_level"]
     application.financial_score = prediction["financial_score"]
@@ -163,7 +170,7 @@ def verify_application(
     db.refresh(application)
 
     return {
-        "message": "Application verified successfully",
+        "message": "AI assessment refreshed. Loan and document decisions were preserved.",
         "application": application.id,
         "status": application.status,
         "prediction": prediction

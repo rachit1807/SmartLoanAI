@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import API from "../api/axios";
+import API, { downloadDocument } from "../api/axios";
 import AdminNav from "../components/AdminNav";
 
 function AdminApplication() {
@@ -48,7 +48,7 @@ function AdminApplication() {
       await API.post(`/admin/verify/${id}`);
 
       fetchApplication();
-      alert("Documents Verified Successfully");
+      alert("AI assessment refreshed. Your loan and document decisions were preserved.");
     } catch (err) {
       console.log(err);
     }
@@ -221,7 +221,7 @@ function AdminApplication() {
 
       {/* AI Prediction */}
 
-      {application.approval_probability && (
+      {application.approval_probability != null && (
         <div
           style={{
             background: "#fff",
@@ -242,7 +242,7 @@ function AdminApplication() {
             }}
           >
             <InfoCard
-              title="Approval Probability"
+              title="Demo model score (not calibrated)"
               value={`${application.approval_probability}%`}
             />
 
@@ -330,6 +330,7 @@ function AdminApplication() {
               <h3>{doc.document_type}</h3>
 
               <p>📄 {doc.original_filename}</p>
+              <button type="button" onClick={() => downloadDocument(doc.id, doc.original_filename).catch(() => alert('File unavailable. Please request a new sample upload.'))}>Download sample</button>
 
               <p style={{ marginTop: 10 }}>
   <b>Status:</b>{" "}

@@ -13,7 +13,7 @@ const getErrorMessage = (error) => {
   return "We could not sign you in. Please try again.";
 };
 
-function Login() {
+function Login({ admin = false }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,11 +26,14 @@ function Login() {
     setIsSubmitting(true);
     try {
       const response = await API.post("/users/login", { email, password });
+      if (admin && response.data.role !== 'admin') {
+        setErrorMessage('This account does not have administrator access. Use the applicant sign-in page.');
+        return;
+      }
       localStorage.setItem("token", response.data.access_token);
       localStorage.setItem("user", JSON.stringify(response.data));
-      navigate("/dashboard");
+      navigate(response.data.role === 'admin' ? '/admin-dashboard' : '/dashboard');
     } catch (error) {
-      console.error(error);
       setErrorMessage(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
@@ -63,7 +66,7 @@ function Login() {
           </div>
           <div className="bank-auth-heading">
             <p className="bank-eyebrow">ACCOUNT ACCESS</p>
-            <h2>Sign in to your account</h2>
+            <h2>{admin ? 'Administrator sign in' : 'Sign in to your account'}</h2>
             <p>Enter your registered details to continue.</p>
           </div>
 

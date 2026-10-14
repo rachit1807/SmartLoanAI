@@ -119,7 +119,7 @@ function LoanRows({ loan, approved, expanded, onToggle }) {
     </tr>
     {expanded && <tr><td colSpan="8" style={styles.detailCell}>
       <div style={styles.detailGrid}>
-        <Detail label="Approval probability" value={formatProbability(loan.approval_probability)} />
+        <Detail label="Demo model score (not calibrated)" value={formatProbability(loan.approval_probability)} />
         <Detail label="Risk level" value={loan.risk_level || "—"} />
         <Detail label="Financial health" value={loan.financial_health || "—"} />
         <Detail label="Total interest" value={formatCurrency(loan.total_interest)} />

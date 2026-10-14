@@ -25,6 +25,7 @@ function Navbar() {
         <NavLink to="/apply-loan">Apply for a loan</NavLink>
         <NavLink to="/document-verification">Documents</NavLink>
         <NavLink to="/loan-history">Applications</NavLink>
+        {JSON.parse(localStorage.getItem('user') || 'null')?.role === 'admin' && <NavLink to="/admin-dashboard">Operations</NavLink>}
         <button className="theme-btn" onClick={() => setDark((current) => !current)}>{dark ? "Light theme" : "Dark theme"}</button>
         <button className="logout-btn" onClick={logout}>Logout</button>
       </div>

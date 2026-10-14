@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Building2, LockKeyhole, Mail, ShieldCheck, UserRound } from "lucide-react";
 
@@ -13,7 +13,11 @@ const getErrorMessage = (error) => {
   return "We could not create your account. Please try again.";
 };
 
-function Register() {
+function Register({ adminSetup = false }) {
+  const [setupToken] = useState(() => adminSetup ? new URLSearchParams(window.location.hash.slice(1)).get('setup') || '' : '');
+  useEffect(() => {
+    if (adminSetup && window.location.hash) window.history.replaceState(null, '', window.location.pathname);
+  }, [adminSetup]);
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -26,10 +30,9 @@ function Register() {
     setErrorMessage("");
     setIsSubmitting(true);
     try {
-      await API.post("/users/register", { name, email, password });
-      navigate("/");
+      await API.post("/users/register", { name, email, password }, adminSetup ? { headers: { 'X-Admin-Setup-Token': setupToken } } : {});
+      navigate(adminSetup ? '/admin-login' : '/');
     } catch (error) {
-      console.error(error);
       setErrorMessage(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
@@ -62,8 +65,8 @@ function Register() {
           </div>
           <div className="bank-auth-heading">
             <p className="bank-eyebrow">CREATE ACCOUNT</p>
-            <h2>Open your SmartLoan account</h2>
-            <p>Use your email address to create a secure applicant profile.</p>
+            <h2>{adminSetup ? 'Set up administrator access' : 'Open your SmartLoan account'}</h2>
+            <p>{adminSetup ? 'Use the authorised email and a new project password of at least 12 characters. This private link creates the account once and cannot reset an existing password.' : 'Use your email address to create a secure applicant profile.'}</p>
           </div>
 
           <form className="bank-auth-form" onSubmit={handleRegister}>
@@ -87,7 +90,7 @@ function Register() {
               <label htmlFor="register-password">Create password</label>
               <div className="bank-input-wrap">
                 <LockKeyhole size={18} aria-hidden="true" />
-                <input id="register-password" type="password" placeholder="Choose a password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" required />
+                <input id="register-password" type="password" minLength={adminSetup ? 12 : 8} maxLength={128} placeholder="Choose a password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="new-password" required />
               </div>
             </div>
 
@@ -99,7 +102,7 @@ function Register() {
           </form>
 
           <p className="bank-auth-switch">
-            Already have an account? <button type="button" onClick={() => navigate("/")}>Sign in</button>
+            Already have an account? <button type="button" onClick={() => navigate(adminSetup ? '/admin-login' : '/')}>Sign in</button>
           </p>
         </section>
       </section>

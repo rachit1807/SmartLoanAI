@@ -1,0 +1,152 @@
+{
+  "dataset": "Bundled synthetic demonstration data; rule-generated labels, not observed defaults",
+  "sha256": "3812031d5737e1cafa16bfa795000c2c5be92badcfffbf5d0bf5580649910cb3",
+  "records": 700,
+  "class_counts": {
+    "0": 382,
+    "1": 318
+  },
+  "positive_class": "Y (synthetic approval), not repayment/default",
+  "train_records": 560,
+  "test_records": 140,
+  "seed": 42,
+  "split": "Stratified 80/20 holdout; 5-fold CV on training only; no tuning on holdout",
+  "sklearn_version": "1.9.0",
+  "features": [
+    "Gender",
+    "Married",
+    "Education",
+    "Self_Employed",
+    "Property_Area",
+    "Dependents",
+    "ApplicantIncome",
+    "CoapplicantIncome",
+    "LoanAmount",
+    "Loan_Amount_Term",
+    "Credit_History"
+  ],
+  "limitations": [
+    "Synthetic labels follow credit-history/income rules; high scores are expected.",
+    "Income and tenure distributions do not represent real lending; high-income inputs may be out of distribution.",
+    "No real-world accuracy, fairness, causality or calibrated approval/default probability is established.",
+    "Dependents is fixed to zero at inference because the application does not collect it."
+  ],
+  "models": {
+    "Majority baseline": {
+      "accuracy": 0.5428571428571428,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": 0.5,
+      "brier_score": 0.45714285714285713,
+      "confusion_matrix_labels": [
+        0,
+        1
+      ],
+      "confusion_matrix": [
+        [
+          76,
+          0
+        ],
+        [
+          64,
+          0
+        ]
+      ],
+      "test_support": {
+        "0": 76,
+        "1": 64
+      },
+      "training_cv_f1_mean": 0.0,
+      "training_cv_f1_std": 0.0,
+      "training_cv_auc_mean": 0.5
+    },
+    "Logistic Regression": {
+      "accuracy": 0.9928571428571429,
+      "precision": 0.9846153846153847,
+      "recall": 1.0,
+      "f1": 0.9922480620155039,
+      "roc_auc": 1.0,
+      "brier_score": 0.010800905027675004,
+      "confusion_matrix_labels": [
+        0,
+        1
+      ],
+      "confusion_matrix": [
+        [
+          75,
+          1
+        ],
+        [
+          0,
+          64
+        ]
+      ],
+      "test_support": {
+        "0": 76,
+        "1": 64
+      },
+      "training_cv_f1_mean": 0.9770298066103159,
+      "training_cv_f1_std": 0.011305108693725275,
+      "training_cv_auc_mean": 0.9992280876390748
+    },
+    "Decision Tree": {
+      "accuracy": 0.9785714285714285,
+      "precision": 0.9692307692307692,
+      "recall": 0.984375,
+      "f1": 0.9767441860465116,
+      "roc_auc": 0.979029605263158,
+      "brier_score": 0.02142857142857143,
+      "confusion_matrix_labels": [
+        0,
+        1
+      ],
+      "confusion_matrix": [
+        [
+          74,
+          2
+        ],
+        [
+          1,
+          63
+        ]
+      ],
+      "test_support": {
+        "0": 76,
+        "1": 64
+      },
+      "training_cv_f1_mean": 0.9823251406544689,
+      "training_cv_f1_std": 0.014337709146214895,
+      "training_cv_auc_mean": 0.9839081510975622
+    },
+    "Random Forest": {
+      "accuracy": 0.9857142857142858,
+      "precision": 0.9696969696969697,
+      "recall": 1.0,
+      "f1": 0.9846153846153847,
+      "roc_auc": 0.9989720394736843,
+      "brier_score": 0.018055,
+      "confusion_matrix_labels": [
+        0,
+        1
+      ],
+      "confusion_matrix": [
+        [
+          74,
+          2
+        ],
+        [
+          0,
+          64
+        ]
+      ],
+      "test_support": {
+        "0": 76,
+        "1": 64
+      },
+      "training_cv_f1_mean": 0.9844593624197586,
+      "training_cv_f1_std": 0.009763416807224404,
+      "training_cv_auc_mean": 0.9986810692547774
+    }
+  }
+}
