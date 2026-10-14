@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Building2, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
 
 import API from "../api/axios";
+import { saveSession } from '../api/session';
 import "../App.css";
 import "./BankAuth.css";
 
@@ -30,9 +31,8 @@ function Login({ admin = false }) {
         setErrorMessage('This account does not have administrator access. Use the applicant sign-in page.');
         return;
       }
-      localStorage.setItem("token", response.data.access_token);
-      localStorage.setItem("user", JSON.stringify(response.data));
-      navigate(response.data.role === 'admin' ? '/admin-dashboard' : '/dashboard');
+      saveSession(admin ? 'admin' : 'applicant', response.data);
+      navigate(admin ? '/admin-dashboard' : '/dashboard');
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     } finally {

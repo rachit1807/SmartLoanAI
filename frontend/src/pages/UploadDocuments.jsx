@@ -53,7 +53,7 @@ function UploadDocuments() {
             for (const [key, file] of selected) {
                 const payload = new FormData();
                 payload.append('application_id', applicationId);
-                payload.append('user_id', JSON.parse(localStorage.getItem('user')).user_id);
+                payload.append('user_id', JSON.parse(localStorage.getItem('smartloan:applicant:user')).user_id);
                 payload.append('document_type', labels[key]);
                 payload.append('file', file);
                 await API.post('/documents/upload', payload);

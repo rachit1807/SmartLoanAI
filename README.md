@@ -4,6 +4,12 @@ An educational loan decision-support prototype combining applicant tracking, rep
 
 ## Live links
 
+### Independent portal sessions
+
+Applicants and administrators can sign in simultaneously in separate tabs of the same browser. Each portal sends its own login token; signing out of one portal does not sign out the other. Applicant sign-in opens the applicant dashboard, while administrator sign-in opens the admin dashboard. Backend administrator-role and applicant-ownership checks remain enforced. Older shared sessions migrate to their corresponding portal only.
+
+Run the session regression checks with `cd frontend && node --test src/api/session.test.js`.
+
 - [Applicant portal](https://smart-loan-ai-one.vercel.app/)
 - [Admin Portal](https://smart-loan-ai-one.vercel.app/admin-dashboard) (administrator login required)
 - [Backend API](https://smartloanai-api.onrender.com)

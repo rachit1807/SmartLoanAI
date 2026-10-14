@@ -23,7 +23,7 @@ function DocumentVerification() {
   const [error, setError] = useState("");
 
   const loadData = async () => {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = localStorage.getItem("smartloan:applicant:user");
     const user = storedUser ? JSON.parse(storedUser) : null;
 
     if (!user?.user_id) {
@@ -74,7 +74,7 @@ function DocumentVerification() {
       return;
     }
 
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(localStorage.getItem("smartloan:applicant:user"));
 
     const payload = new FormData();
 

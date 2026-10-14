@@ -57,7 +57,7 @@ function ApplyLoan() {
     const monthlyRate = rate / 1200;
     setEmi(Math.round(principal * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1)));
   };
-  const loanDataFromForm = () => ({ user_id:JSON.parse(localStorage.getItem("user") || "null")?.user_id, age:Number(formData.age), gender:formData.gender, married:formData.married, education:formData.education, employment_status:formData.employment_status, income:Number(formData.income), coapplicant_income:Number(formData.coapplicant_income), loan_amount:Number(formData.loan_amount), loan_term:Number(formData.loan_term), credit_history:formData.credit_history, property_area:formData.property_area });
+  const loanDataFromForm = () => ({ user_id:JSON.parse(localStorage.getItem("smartloan:applicant:user") || "null")?.user_id, age:Number(formData.age), gender:formData.gender, married:formData.married, education:formData.education, employment_status:formData.employment_status, income:Number(formData.income), coapplicant_income:Number(formData.coapplicant_income), loan_amount:Number(formData.loan_amount), loan_term:Number(formData.loan_term), credit_history:formData.credit_history, property_area:formData.property_area });
   const runSimulation = async () => {
     setSimulationError("");
     setSimulation(null);

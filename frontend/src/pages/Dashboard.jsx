@@ -40,7 +40,7 @@ function Dashboard() {
   useEffect(() => {
     const getDashboard = async () => {
       try {
-        const storedUser = localStorage.getItem("user");
+        const storedUser = localStorage.getItem("smartloan:applicant:user");
         const userData = storedUser ? JSON.parse(storedUser) : null;
 
         if (!userData?.user_id) {
