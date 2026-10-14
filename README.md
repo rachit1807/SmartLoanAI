@@ -5,8 +5,7 @@ An educational loan decision-support prototype combining applicant tracking, rep
 ## Live links
 
 - [Applicant portal](https://smart-loan-ai-one.vercel.app/)
-- [Admin dashboard](https://smart-loan-ai-one.vercel.app/admin-dashboard)
-- [Admin sign in](https://smart-loan-ai-one.vercel.app/admin-login)
+- [Admin Portal](https://smart-loan-ai-one.vercel.app/admin-dashboard) (administrator login required)
 - [Backend API](https://smartloanai-api.onrender.com)
 - [GitHub repository](https://github.com/rachit1807/SmartLoanAI)
 
