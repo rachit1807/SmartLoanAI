@@ -45,3 +45,16 @@
   color:#d4eaf1 !important;
   border-color:#6ca8b7 !important;
 }
+
+/* Equal side columns keep the applicant control truly centered. */
+.dashboard.reactor-dashboard > .reactor-toolbar {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  align-items:center;
+}
+.dashboard.reactor-dashboard > .reactor-toolbar > span { grid-column:1; }
+.dashboard.reactor-dashboard > .reactor-toolbar > button { grid-column:2; justify-self:center; margin:0; }
+@media(max-width:600px) {
+  .dashboard.reactor-dashboard > .reactor-toolbar { grid-template-columns:1fr; justify-items:center; }
+  .dashboard.reactor-dashboard > .reactor-toolbar > button { grid-column:1; }
+}
