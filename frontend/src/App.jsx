@@ -14,11 +14,13 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminApplication from "./pages/AdminApplication";
 import "./Banking.css";
 import ProtectedRoute from './components/ProtectedRoute';
+import ThemePreview from './pages/ThemePreview';
 
 function App() {
     return (
         <BrowserRouter>
             <Routes>
+                {import.meta.env.DEV && <Route path="/theme-preview" element={<ThemePreview />} />}
 
                 {/* Authentication */}
                 <Route path="/" element={<Login />} />

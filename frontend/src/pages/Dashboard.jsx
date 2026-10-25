@@ -4,6 +4,7 @@ import { AlertCircle, ShieldCheck } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import Navbar from "../components/Navbar";
+import ReactorBackdrop from '../components/ReactorBackdrop';
 import API from "../api/axios";
 import "../App.css";
 
@@ -77,8 +78,9 @@ function Dashboard() {
   const riskClass = stats.risk_level === "High" ? "risk-high" : stats.risk_level === "Medium" ? "risk-medium" : "risk-low";
 
   return (
-    <div className="dashboard">
+    <div className="dashboard reactor-dashboard">
       <Navbar />
+      <ReactorBackdrop />
 
       <div style={styles.welcome}>
         <div>

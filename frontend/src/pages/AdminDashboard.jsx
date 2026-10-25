@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
 import AdminNav from "../components/AdminNav";
+import ReactorBackdrop from '../components/ReactorBackdrop';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -96,7 +97,7 @@ function AdminDashboard() {
 
   return (
     <div
-  className="bank-admin-page"
+  className="bank-admin-page reactor-dashboard"
   style={{
     minHeight: "100vh",
     background: "#f4f7fb",
@@ -104,6 +105,7 @@ function AdminDashboard() {
   }}
 >
   <AdminNav />
+  <ReactorBackdrop />
   {/* Header */}
 
   <div
