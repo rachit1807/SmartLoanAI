@@ -26,7 +26,7 @@ export default function ReactorBackdrop() {
       <BookOpen className="reactor-symbol symbol-four" />
     </aside>
     <div className="reactor-toolbar">
-      <span><i /> SMARTLOAN · BLUE REACTOR</span>
+      <span><i /> SMARTLOAN</span>
       <button type="button" aria-pressed={paused} onClick={toggle}>{paused ? 'Resume background motion' : 'Pause background motion'}</button>
     </div>
   </>;
