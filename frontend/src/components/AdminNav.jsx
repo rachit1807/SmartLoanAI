@@ -11,7 +11,7 @@ export default function AdminNav() {
   }, [dark]);
 
   return <nav className="main-navbar" aria-label="Administration">
-    <Link to="/admin-dashboard" className="nav-logo" style={{ textDecoration: "none" }}>SmartLoan <small style={{ fontSize: 12, fontWeight: 400 }}>Operations</small></Link>
+    <Link to="/admin-dashboard" className="nav-logo" style={{ textDecoration: "none" }}>SmartLoan</Link>
     <div className="nav-links"><Link to="/admin-dashboard">Application queue</Link><Link to="/dashboard">Applicant portal</Link>
       <button type="button" className="theme-btn" aria-pressed={dark} aria-label={dark ? "Switch to light theme" : "Switch to dark theme"} onClick={() => setDark(current => !current)}>{dark ? "Light theme" : "Dark theme"}</button>
       <button type="button" onClick={() => { clearSession('admin'); window.location.assign('/admin-login'); }}>Sign out</button>
